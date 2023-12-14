@@ -1,3 +1,6 @@
+// Entt
+#include <entt/entt.hpp>
+
 // Windows
 #include <Windows.h>
 
@@ -17,7 +20,10 @@
 #include <memory>
 #include <array>
 #include <vector>
+#include <string>
 
+// ImGui
 #include "imgui.h"
 #include "backends/imgui_impl_win32.h"
 #include "backends/imgui_impl_dx11.h"
+

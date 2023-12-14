@@ -8,9 +8,9 @@ class ITexture;
 class IShader;
 class IRenderable;
 
-enum RingLayer { Outer, Middle, Inner, NumRings };
-enum GameState { Setup, Playing, Test, NumModes };
-static const unsigned int NumberOfRings = static_cast<int>(NumRings);
+enum class RingLayer { Outer, Middle, Inner, NumRings };
+enum class GameState { Setup, Playing, Test, NumModes };
+static const unsigned int NumberOfRings = static_cast<int>(RingLayer::NumRings);
 
 class Game : public IApplication
 {
@@ -32,6 +32,7 @@ private:
 	void UpdateRingTestSelection();
 	void TestRingSolution();
 
+	entt::registry _registry;
 	std::shared_ptr<IRenderable> _rings[NumberOfRings];
 	std::shared_ptr<IRenderable> _arrow;
 	RingLayer _selectedRing;

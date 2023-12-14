@@ -50,7 +50,7 @@
     <SourcePath>$(SourcePath)</SourcePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath);$(ProjectDir);</IncludePath>
     <OutDir>$(SolutionDir)executable\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)intermediate\$(Platform)\$(Configuration)\</IntDir>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
@@ -62,7 +62,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>include;third_party\imgui\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;third_party\imgui\;$(ProjectDir)third_party\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -85,7 +85,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>include;third_party\imgui\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;third_party\imgui\;$(ProjectDir)third_party\</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -137,6 +137,8 @@
     <ClInclude Include="include\engine\Transform2D.h" />
     <ClInclude Include="include\game\Game.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="third_party\entt\entt.hpp" />
+    <ClInclude Include="third_party\entt\fwd.hpp" />
     <ClInclude Include="third_party\imgui\backends\imgui_impl_dx11.h" />
     <ClInclude Include="third_party\imgui\backends\imgui_impl_win32.h" />
     <ClInclude Include="third_party\imgui\imgui.h" />
