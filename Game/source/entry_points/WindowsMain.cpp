@@ -20,6 +20,8 @@ std::unique_ptr<IApplication> GetApplication(std::shared_ptr<IGraphics> Graphics
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
+	ImGui_ImplWin32_EnableDpiAwareness();
+
 	WNDCLASSEX wc;
 	HWND hwnd;
 
@@ -53,38 +55,67 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);
 
+	ImGui::CreateContext();
+	ImGuiIO& io{ ImGui::GetIO() };
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	ImGui::StyleColorsDark();
+	
+    ImGui_ImplWin32_Init(hwnd);
+
 	MSG msg;
 	msg.message = WM_NULL;
 	msg.wParam = -1;
-	std::shared_ptr<IGraphics> Graphics = std::make_shared<DirectX11Graphics>(hwnd);
-	std::shared_ptr<IInput> Input = std::make_shared<DirectXInput>();
-	std::unique_ptr<IApplication> Application = GetApplication(Graphics, Input);
-
-	if (Graphics && Graphics->IsValid() && Application)
 	{
-		Application->Load();
+		std::shared_ptr<IGraphics> Graphics = std::make_shared<DirectX11Graphics>(hwnd);
+		std::shared_ptr<IInput> Input = std::make_shared<DirectXInput>();
+		std::unique_ptr<IApplication> Application = GetApplication(Graphics, Input);
 
-		while (msg.message != WM_QUIT && Application->IsValid())
+		if (Graphics && Graphics->IsValid() && Application)
 		{
-			if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+			Application->Load();
+
+			while (msg.message != WM_QUIT && Application->IsValid())
 			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
+				if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+				{
+					TranslateMessage(&msg);
+					DispatchMessage(&msg);
+				}
+				Graphics->BeginUpdate();
+
+				ImGui_ImplWin32_NewFrame();
+				ImGui::NewFrame();
+
+				ImGui::ShowDemoWindow();
+
+				Input->Update();
+				Application->Update();
+
+				Graphics->Update();
+
+				ImGui::Render();
+				Graphics->EndUpdate();
 			}
 
-			Input->Update();
-			Application->Update();
-			Graphics->Update();
-		}
 
-		Application->Cleanup();
+			Application->Cleanup();
+		}
 	}
+
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 
 	return static_cast<int>(msg.wParam);
 }
 
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
+		return true;
+
 	switch (msg)
 	{
 	case WM_CLOSE:

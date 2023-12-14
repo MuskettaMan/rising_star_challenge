@@ -7,7 +7,6 @@
 #include "Engine/IRenderable.h"
 #include "Engine/IInput.h"
 
-
 #define CLAMP(v, x, y) fmin(fmax(v, x), y)
 
 constexpr float PI = 3.14159265359f;

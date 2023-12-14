@@ -15,7 +15,9 @@ public:
 	IGraphics();
 	virtual ~IGraphics();
 
+	virtual void BeginUpdate() = 0;
 	virtual void Update() = 0;
+	virtual void EndUpdate() = 0;
 	virtual bool IsValid() = 0;
 
 	virtual std::shared_ptr<ITexture> CreateTexture(const wchar_t* filepath) = 0;

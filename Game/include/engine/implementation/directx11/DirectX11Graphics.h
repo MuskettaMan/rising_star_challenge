@@ -19,7 +19,9 @@ public:
 	DirectX11Graphics(HWND hwndIn);
 	virtual ~DirectX11Graphics();
 
+	virtual void BeginUpdate();
 	virtual void Update();
+	virtual void EndUpdate();
 	virtual bool IsValid();
 
 	virtual std::shared_ptr<ITexture> CreateTexture(const wchar_t* filepath);

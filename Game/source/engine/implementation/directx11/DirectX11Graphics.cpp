@@ -97,10 +97,14 @@ DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(n
         Desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
         _device->CreateBlendState(&Desc, &_blendState);
     }
+
+    ImGui_ImplDX11_Init(_device, _context);
 }
 
 DirectX11Graphics::~DirectX11Graphics()
 {
+    ImGui_ImplDX11_Shutdown();
+
     if (_blendState)
     {
         _blendState->Release();
@@ -127,10 +131,16 @@ DirectX11Graphics::~DirectX11Graphics()
     }
 }
 
+void DirectX11Graphics::BeginUpdate()
+{
+    ImGui_ImplDX11_NewFrame();
+}
+
 void DirectX11Graphics::Update()
 {
     if (_context && _swapChain)
     {
+
         float clearColour[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
         _context->ClearRenderTargetView(_backbufferView, clearColour);
 
@@ -156,7 +166,15 @@ void DirectX11Graphics::Update()
                 (*renderable)->Update();
             }
         }
+    }
+}
 
+void DirectX11Graphics::EndUpdate()
+{
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+    if (_context && _swapChain)
+    {
         _swapChain->Present(0, 0);
     }
 }
