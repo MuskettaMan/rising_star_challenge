@@ -16,6 +16,9 @@ using Microsoft::WRL::ComPtr;
 
 #include <XInput.h>
 
+#include <directxmath.h>
+using DirectX::XMFLOAT2;
+
 // Standard Library
 #include <ctime>
 #include <math.h>

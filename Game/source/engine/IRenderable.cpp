@@ -8,8 +8,8 @@ const Transform2D& IRenderable::GetTransform() const
 
 void IRenderable::SetPosition(float x, float y)
 {
-	_transform.positionX = x;
-	_transform.positionY = y;
+	_transform.position.x = x;
+	_transform.position.y = y;
 }
 
 void IRenderable::SetRotation(float r)
@@ -19,6 +19,6 @@ void IRenderable::SetRotation(float r)
 
 void IRenderable::SetScale(float sx, float sy)
 {
-	_transform.scaleX = sx;
-	_transform.scaleY = sy;
+	_transform.scale.x = sx;
+	_transform.scale.y = sy;
 }

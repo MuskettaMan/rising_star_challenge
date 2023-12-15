@@ -1,12 +1,10 @@
-
 #pragma once
+
 
 struct Transform2D
 {
-	float positionX = 0;
-	float positionY = 0;
-	float rotation = 0;
-	float scaleX = 1;
-	float scaleY = 1;
+	XMFLOAT2 position{ 0.0f, 0.0f };
+	float rotation = 0.0f;
+	XMFLOAT2 scale{ 1.0f, 1.0f };
 };
 

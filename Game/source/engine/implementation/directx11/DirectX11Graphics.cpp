@@ -297,9 +297,9 @@ std::shared_ptr<IRenderable> DirectX11Graphics::CreateBillboard(std::shared_ptr<
 
 void DirectX11Graphics::SetWorldMatrix(const Transform2D& transform)
 {
-    DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(transform.positionX, transform.positionY, 10.0f);
+    DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(transform.position.x, transform.position.y, 10.0f);
     DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationZ(transform.rotation);
-    DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(transform.scaleX, transform.scaleY, 1.0f);
+    DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, 1.0f);
     DirectX::XMMATRIX world = scale * rotation * translation;
     DirectX::XMMATRIX mvp = DirectX::XMMatrixMultiply(world, _vpMatrix);
     mvp = DirectX::XMMatrixTranspose(mvp);
