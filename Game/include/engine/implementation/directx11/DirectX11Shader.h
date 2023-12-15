@@ -11,15 +11,14 @@ class DirectX11Shader : public IShader
 {
 public:
 
-	DirectX11Shader(ID3D11DeviceContext* context, ID3D11VertexShader* vertexShader, ID3D11PixelShader* pixelShader, ID3D11InputLayout* inputLayout, std::shared_ptr<ITexture> texture);
-	virtual ~DirectX11Shader();
+	DirectX11Shader(ComPtr<ID3D11DeviceContext> context, ComPtr<ID3D11VertexShader> vertexShader, ComPtr<ID3D11PixelShader> pixelShader, ComPtr<ID3D11InputLayout> inputLayout, std::shared_ptr<ITexture> texture);
 	virtual void Update();
 
 private:
 
-	ID3D11DeviceContext* _context;
-	ID3D11VertexShader* _vertexShader;
-	ID3D11PixelShader* _pixelShader;
-	ID3D11InputLayout* _inputLayout;
+	ComPtr<ID3D11DeviceContext> _context;
+	ComPtr<ID3D11VertexShader> _vertexShader;
+	ComPtr<ID3D11PixelShader> _pixelShader;
+	ComPtr<ID3D11InputLayout> _inputLayout;
 };
 

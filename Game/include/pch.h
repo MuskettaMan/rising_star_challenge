@@ -3,6 +3,9 @@
 
 // Windows
 #include <Windows.h>
+#include "wrl/client.h"
+
+using Microsoft::WRL::ComPtr;
 
 // Direct X
 #include <d3dcommon.h>

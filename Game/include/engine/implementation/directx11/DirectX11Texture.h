@@ -8,7 +8,7 @@ class DirectX11Texture : public ITexture
 {
 public:
 
-	DirectX11Texture(ID3D11DeviceContext* context, ID3D11ShaderResourceView* texture, ID3D11SamplerState* sampler, const D3D11_TEXTURE2D_DESC& description);
+	DirectX11Texture(const ComPtr<ID3D11DeviceContext> context, ComPtr<ID3D11ShaderResourceView> texture, ComPtr<ID3D11SamplerState> sampler, const D3D11_TEXTURE2D_DESC& description);
 	virtual ~DirectX11Texture();
 
 	virtual void Update();
@@ -17,9 +17,9 @@ public:
 
 private:
 
-	ID3D11DeviceContext* _context;
-	ID3D11ShaderResourceView* _texture;
-	ID3D11SamplerState* _sampler;
+	const ComPtr<ID3D11DeviceContext> _context;
+	ComPtr<ID3D11ShaderResourceView> _texture;
+	ComPtr<ID3D11SamplerState> _sampler;
 	D3D11_TEXTURE2D_DESC _description;
 };
 
