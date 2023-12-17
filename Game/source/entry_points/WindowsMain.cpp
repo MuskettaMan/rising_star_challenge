@@ -9,12 +9,14 @@
 #include "Engine/ITexture.h"
 #include "Engine/IShader.h"
 #include "Engine/IApplication.h"
-#include <engine/editor/editor.hpp>
+#include <editor/editor.hpp>
 
 const char WindowClassName[] = "Star";
 const char WindowTitle[] = "Search for a Star 2024";
 const int WindowWidth = 1920;
 const int WindowHeight = 1080;
+
+bool doResize = false;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 std::unique_ptr<IApplication> GetApplication(std::shared_ptr<IGraphics> Graphics, std::shared_ptr<IInput> Input);
@@ -84,6 +86,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 					TranslateMessage(&msg);
 					DispatchMessage(&msg);
 				}
+
+				if (doResize)
+				{
+					RECT dimensions;
+					GetClientRect(hwnd, &dimensions);
+					uint32_t windowWidth = dimensions.right - dimensions.left;
+					uint32_t windowHeight = dimensions.bottom - dimensions.top;
+
+					graphics->SetScreenSize(windowWidth, windowHeight);
+					doResize = false;
+				}
+
 				graphics->BeginUpdate();
 
 				ImGui_ImplWin32_NewFrame();
@@ -113,6 +127,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+bool minimized = false;
+bool inSizeMove = false;
+
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wParam, lParam))
@@ -126,6 +143,39 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		break;
+	case WM_SIZE:
+		if (wParam == SIZE_MINIMIZED)
+		{
+			// DEVNOTE: Application is minimized, should probably suspend.
+			if (!minimized)
+				minimized = true;
+		}
+		else if (minimized)
+		{
+			minimized = false;
+		}
+		else if (inSizeMove)
+		{
+			doResize = true;
+		}
+		else if (!inSizeMove)
+		{
+			doResize = true;
+		}
+		break;
+	case WM_ENTERSIZEMOVE:
+		inSizeMove = true;
+		break;
+	case WM_EXITSIZEMOVE:
+		inSizeMove = false;
+		break;
+	case WM_GETMINMAXINFO:
+	{
+		auto info = reinterpret_cast<MINMAXINFO*>(lParam);
+		info->ptMinTrackSize.x = 320;
+		info->ptMinTrackSize.y = 200;
+	}
+	break;
 	default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}

@@ -31,6 +31,10 @@ using DirectX::XMFLOAT3;
 
 // ImGui
 #include "imgui.h"
+#include "imgui_internal.h"
 #include "backends/imgui_impl_win32.h"
 #include "backends/imgui_impl_dx11.h"
 
+
+// Constants
+constexpr bool ENABLE_EDITOR = true;

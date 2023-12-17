@@ -25,8 +25,9 @@ public:
 	virtual std::shared_ptr<IShader> CreateShader(const wchar_t* filepath, const char* vsentry, const char* vsshader, const char* psentry, const char* psshader, std::shared_ptr<ITexture> TextureIn) = 0;
 	virtual std::shared_ptr<IRenderable> CreateBillboard(std::shared_ptr<IShader> ShaderIn) = 0;
 
-	virtual void* GetBackBuffer() const = 0;
-
+	virtual void SetScreenSize(uint32_t width, uint32_t height) = 0;
+	virtual void GetScreenSize(uint32_t& width, uint32_t& height) = 0;
+	virtual void* GetRenderTextureSRV() const = 0;
 
 protected:
 

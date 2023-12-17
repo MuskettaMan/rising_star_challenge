@@ -5,12 +5,15 @@
 #include "engine/implementation/directx11/DirectX11Shader.h"
 #include "engine/implementation/directx11/DirectX11Texture.h"
 
-DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferView(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _vpMatrix(), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0)
+DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferRTV(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _vpMatrix(), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0)
 {
     RECT dimensions;
     GetClientRect(_hwnd, &dimensions);
     _windowWidth = dimensions.right - dimensions.left;
     _windowHeight = dimensions.bottom - dimensions.top;
+    
+    _renderTextureWidth = _windowWidth;
+    _renderTextureHeight = _windowHeight;
 
     D3D_DRIVER_TYPE driverTypes[] = { D3D_DRIVER_TYPE_HARDWARE, D3D_DRIVER_TYPE_WARP, D3D_DRIVER_TYPE_SOFTWARE };
     unsigned int totalDriverTypes = ARRAYSIZE(driverTypes);
@@ -48,16 +51,7 @@ DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(n
 
     if (SUCCEEDED(hr))
     {
-        hr = _swapChain->GetBuffer(0, IID_PPV_ARGS(_backbufferTexture.GetAddressOf()));
-    }
-
-    if (SUCCEEDED(hr))
-    {
-        D3D11_RENDER_TARGET_VIEW_DESC desc = {};
-        memset(&desc, 0, sizeof(desc));
-        desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-        desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-        hr = _device->CreateRenderTargetView(_backbufferTexture.Get(), &desc, _backbufferView.GetAddressOf());
+        hr = SetupBackBuffer();
     }
 
     if (FAILED(hr))
@@ -97,40 +91,7 @@ DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(n
         _device->CreateBlendState(&Desc, &_blendState);
     }
 
-    DXGI_SAMPLE_DESC sampleDesc;
-    ZeroMemory(&sampleDesc, sizeof(sampleDesc));
-    sampleDesc.Count = 1;
-    sampleDesc.Quality = 0;
-
-    D3D11_TEXTURE2D_DESC texDesc;
-    ZeroMemory(&texDesc, sizeof(texDesc));
-    texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    texDesc.Usage = D3D11_USAGE_DEFAULT;
-    texDesc.Width = 1920;
-    texDesc.Height = 1080;
-    texDesc.CPUAccessFlags = 0;
-    texDesc.ArraySize = 1;
-    texDesc.SampleDesc = sampleDesc;
-    texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
-    texDesc.MiscFlags = 0;
-    texDesc.MipLevels = 1;
-    _device->CreateTexture2D(&texDesc, nullptr, _renderTargetTexture.GetAddressOf());
-
-    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-    ZeroMemory(&srvDesc, sizeof(srvDesc));
-    srvDesc.Format = texDesc.Format;
-    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MostDetailedMip = 0;
-    srvDesc.Texture2D.MipLevels = 1;
-    _device->CreateShaderResourceView(_renderTargetTexture.Get(), &srvDesc, _renderTargetSRV.GetAddressOf());
-    
-    D3D11_RENDER_TARGET_VIEW_DESC rtvDescription;
-    ZeroMemory(&rtvDescription, sizeof(rtvDescription));
-    rtvDescription.Format = texDesc.Format;
-    rtvDescription.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
-    rtvDescription.Texture2D.MipSlice = 0;
-
-    _device->CreateRenderTargetView(_renderTargetTexture.Get(), &rtvDescription, _renderTargetView.GetAddressOf());
+    SetupRenderTexture();
 
     ImGui_ImplDX11_Init(_device.Get(), _context.Get());
 }
@@ -150,9 +111,11 @@ void DirectX11Graphics::Update()
     if (_context && _swapChain)
     {
 
-        float clearColour[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-        _context->ClearRenderTargetView(_backbufferView.Get(), clearColour);
-        //_context->ClearRenderTargetView(_renderTargetView.Get(), clearColour);
+        float clearColour[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        _context->ClearRenderTargetView(_backbufferRTV.Get(), clearColour);
+        
+        if(ENABLE_EDITOR)
+            _context->ClearRenderTargetView(_renderTextureRTV.Get(), clearColour);
 
         D3D11_VIEWPORT viewport;
         viewport.Width = static_cast<float>(_windowWidth);
@@ -163,8 +126,8 @@ void DirectX11Graphics::Update()
         viewport.TopLeftY = 0.0f;
         _context->RSSetViewports(1, &viewport);
 
-        //_context->OMSetRenderTargets(1, _backbufferView.GetAddressOf(), NULL);
-        _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), nullptr);
+
+        _context->OMSetRenderTargets(1, ENABLE_EDITOR ? _renderTextureRTV.GetAddressOf() : _backbufferRTV.GetAddressOf(), nullptr);
 
         for (auto bucket = _renderables.begin(); bucket != _renderables.end(); ++bucket)
         {
@@ -178,7 +141,7 @@ void DirectX11Graphics::Update()
             }
         }
 
-        _context->OMSetRenderTargets(1, _backbufferView.GetAddressOf(), nullptr);
+        _context->OMSetRenderTargets(1, _backbufferRTV.GetAddressOf(), nullptr);
     }
 }
 
@@ -353,6 +316,33 @@ std::shared_ptr<IRenderable> DirectX11Graphics::CreateBillboard(std::shared_ptr<
     return result;
 }
 
+void DirectX11Graphics::SetScreenSize(uint32_t width, uint32_t height)
+{
+    _windowWidth = width; _windowHeight = height;
+    
+    _context->OMSetRenderTargets(0, nullptr, nullptr);
+
+    _backbufferRTV.Reset();
+    _backbufferTexture.Reset();
+
+    //_renderTexture.Reset();
+    //_renderTextureRTV.Reset();
+    //_renderTextureSRV.Reset();
+
+    _context->Flush();
+
+    _swapChain->ResizeBuffers(1, _windowWidth, _windowHeight, DXGI_FORMAT_R8G8B8A8_UNORM, 0);
+
+    SetupBackBuffer();
+    //SetupRenderTexture();
+
+    float halfWidth = static_cast<float>(width / 2);
+    float halfHeight = static_cast<float>(height / 2);
+    DirectX::XMMATRIX view = DirectX::XMMatrixIdentity();
+    DirectX::XMMATRIX projection = DirectX::XMMatrixOrthographicOffCenterLH(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.1f, 10.1f);
+    _vpMatrix = DirectX::XMMatrixMultiply(view, projection);
+}
+
 void DirectX11Graphics::SetWorldMatrix(const Transform2D& transform)
 {
     DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(transform.position.x, transform.position.y, 10.0f);
@@ -385,4 +375,60 @@ bool DirectX11Graphics::CompileShader(LPCWSTR filepath, LPCSTR entry, LPCSTR sha
     }
 
     return hr == S_OK;
+}
+
+HRESULT DirectX11Graphics::SetupBackBuffer()
+{
+    HRESULT hr;
+    hr = _swapChain->GetBuffer(0, IID_PPV_ARGS(_backbufferTexture.GetAddressOf()));
+    if (FAILED(hr))
+        return hr;
+
+    D3D11_RENDER_TARGET_VIEW_DESC desc = {};
+    ZeroMemory(&desc, sizeof(desc));
+
+    desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    desc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+    hr = _device->CreateRenderTargetView(_backbufferTexture.Get(), &desc, _backbufferRTV.GetAddressOf());
+
+    return hr;
+}
+
+void DirectX11Graphics::SetupRenderTexture()
+{
+    DXGI_SAMPLE_DESC sampleDesc;
+    ZeroMemory(&sampleDesc, sizeof(sampleDesc));
+    sampleDesc.Count = 1;
+    sampleDesc.Quality = 0;
+
+    D3D11_TEXTURE2D_DESC texDesc;
+    ZeroMemory(&texDesc, sizeof(texDesc));
+    texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    texDesc.Usage = D3D11_USAGE_DEFAULT;
+    texDesc.Width = _renderTextureWidth;
+    texDesc.Height = _renderTextureHeight;
+    texDesc.CPUAccessFlags = 0;
+    texDesc.ArraySize = 1;
+    texDesc.SampleDesc = sampleDesc;
+    texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    texDesc.MiscFlags = 0;
+    texDesc.MipLevels = 1;
+    _device->CreateTexture2D(&texDesc, nullptr, _renderTexture.GetAddressOf());
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+    ZeroMemory(&srvDesc, sizeof(srvDesc));
+    srvDesc.Format = texDesc.Format;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    srvDesc.Texture2D.MipLevels = 1;
+    _device->CreateShaderResourceView(_renderTexture.Get(), &srvDesc, _renderTextureSRV.GetAddressOf());
+
+    D3D11_RENDER_TARGET_VIEW_DESC rtvDescription;
+    ZeroMemory(&rtvDescription, sizeof(rtvDescription));
+    rtvDescription.Format = texDesc.Format;
+    rtvDescription.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+    rtvDescription.Texture2D.MipSlice = 0;
+
+    _device->CreateRenderTargetView(_renderTexture.Get(), &rtvDescription, _renderTextureRTV.GetAddressOf());
 }

@@ -35,14 +35,14 @@ bool Game::IsValid()
 
 bool Game::Load()
 {
-	innerTexture = _graphics->CreateTexture(L"resource/textures/InnerRing.dds");
-	std::shared_ptr<ITexture> middleTexture = _graphics->CreateTexture(L"resource/textures/MiddleRing.dds");
-	std::shared_ptr<ITexture> outerTexture = _graphics->CreateTexture(L"resource/textures/OuterRing.dds");
-	std::shared_ptr<ITexture> arrowTexture = _graphics->CreateTexture(L"resource/textures/Arrow.dds");
-	std::shared_ptr<IShader> innerShader = _graphics->CreateShader(L"resource/shaders/UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", innerTexture);
-	std::shared_ptr<IShader> middleShader = _graphics->CreateShader(L"resource/shaders/UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", middleTexture);
-	std::shared_ptr<IShader> outerShader = _graphics->CreateShader(L"resource/shaders/UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", outerTexture);
-	std::shared_ptr<IShader> arrowShader = _graphics->CreateShader(L"resource/shaders/UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", arrowTexture);
+	innerTexture = _graphics->CreateTexture(L"assets\\textures\\InnerRing.dds");
+	std::shared_ptr<ITexture> middleTexture = _graphics->CreateTexture(L"assets\\textures\\MiddleRing.dds");
+	std::shared_ptr<ITexture> outerTexture = _graphics->CreateTexture(L"assets\\textures\\OuterRing.dds");
+	std::shared_ptr<ITexture> arrowTexture = _graphics->CreateTexture(L"assets\\textures\\Arrow.dds");
+	std::shared_ptr<IShader> innerShader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", innerTexture);
+	std::shared_ptr<IShader> middleShader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", middleTexture);
+	std::shared_ptr<IShader> outerShader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", outerTexture);
+	std::shared_ptr<IShader> arrowShader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", arrowTexture);
 	_rings[static_cast<unsigned int>(RingLayer::Inner)] = _graphics->CreateBillboard(innerShader);
 	_rings[static_cast<unsigned int>(RingLayer::Middle)] = _graphics->CreateBillboard(middleShader);
 	_rings[static_cast<unsigned int>(RingLayer::Outer)] = _graphics->CreateBillboard(outerShader);
