@@ -35,6 +35,9 @@ bool Game::IsValid()
 
 bool Game::Load()
 {
+	ECS::Instance().CreateGameObject("Test 1");
+	ECS::Instance().CreateGameObject("My GameObject");
+
 	innerTexture = _graphics->CreateTexture(L"assets\\textures\\InnerRing.dds");
 	std::shared_ptr<ITexture> middleTexture = _graphics->CreateTexture(L"assets\\textures\\MiddleRing.dds");
 	std::shared_ptr<ITexture> outerTexture = _graphics->CreateTexture(L"assets\\textures\\OuterRing.dds");

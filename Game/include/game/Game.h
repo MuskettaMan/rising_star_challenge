@@ -32,7 +32,6 @@ private:
 	void UpdateRingTestSelection();
 	void TestRingSolution();
 
-	entt::registry _registry;
 	std::shared_ptr<IRenderable> _rings[NumberOfRings];
 	std::shared_ptr<IRenderable> _arrow;
 	RingLayer _selectedRing;

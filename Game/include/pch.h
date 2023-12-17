@@ -35,6 +35,11 @@ using DirectX::XMFLOAT3;
 #include "backends/imgui_impl_win32.h"
 #include "backends/imgui_impl_dx11.h"
 
+// Else
+#include "stduuid/uuid.h"
 
 // Constants
 constexpr bool ENABLE_EDITOR = true;
+
+// ECS
+#include "engine/ecs.hpp"

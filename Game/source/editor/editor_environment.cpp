@@ -55,8 +55,8 @@ void EditorEnvironment::Update()
 			ImGui::DockBuilderFinish(_dockRootID);
 
 			_tabs.push_back(std::make_unique<SceneTab>(sceneID, _graphics, ImGuiWindowFlags_NoScrollbar));
-			_tabs.push_back(std::make_unique<HierarchyTab>(hierarchyID));
-			_tabs.push_back(std::make_unique<InspectorTab>(inspectorID));
+			_tabs.push_back(std::make_unique<HierarchyTab>(hierarchyID, _selectedEntity));
+			_tabs.push_back(std::make_unique<InspectorTab>(inspectorID, _selectedEntity));
 
 			_dockSpaceInitialized = true;
 		}
