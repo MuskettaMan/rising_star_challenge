@@ -101,9 +101,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\editor\base_tab.cpp" />
     <ClCompile Include="source\editor\editor_environment.cpp" />
     <ClCompile Include="source\editor\editor.cpp" />
     <ClCompile Include="source\editor\editor_util.cpp" />
+    <ClCompile Include="source\editor\hierarchy_tab.cpp" />
+    <ClCompile Include="source\editor\inspector_tab.cpp" />
+    <ClCompile Include="source\editor\scene_tab.cpp" />
     <ClCompile Include="source\engine\IApplication.cpp" />
     <ClCompile Include="source\engine\IGraphics.cpp" />
     <ClCompile Include="source\engine\IInput.cpp" />
@@ -126,9 +130,13 @@
     <ClCompile Include="third_party\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\editor\base_tab.hpp" />
     <ClInclude Include="include\editor\editor_environment.hpp" />
     <ClInclude Include="include\editor\editor.hpp" />
     <ClInclude Include="include\editor\editor_util.hpp" />
+    <ClInclude Include="include\editor\hierarchy_tab.hpp" />
+    <ClInclude Include="include\editor\inspector_tab.hpp" />
+    <ClInclude Include="include\editor\scene_tab.hpp" />
     <ClInclude Include="include\engine\IApplication.h" />
     <ClInclude Include="include\engine\IGraphics.h" />
     <ClInclude Include="include\engine\IInput.h" />

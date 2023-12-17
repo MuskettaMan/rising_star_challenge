@@ -1,6 +1,7 @@
 #pragma once
 
 class IGraphics;
+class BaseTab;
 
 class EditorEnvironment
 {
@@ -13,8 +14,7 @@ private:
 	IGraphics& _graphics;
 	bool _dockSpaceInitialized{ false };
 	ImGuiID _dockRootID;
-	ImGuiID _gameID;
-	ImGuiID _hierarchyID;
-	ImGuiID _inspectorID;
+
+	std::vector<std::unique_ptr<BaseTab>> _tabs;
 };
 
