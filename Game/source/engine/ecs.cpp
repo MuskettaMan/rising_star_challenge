@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "engine/ecs.hpp"
 #include <engine/gameobject.hpp>
+#include "engine/transform.hpp"
 
 ECS& ECS::Instance()
 {
@@ -20,6 +21,11 @@ entt::entity ECS::CreateGameObject(const std::string& name)
 	gameObject.name = name;
 	gameObject.entity = entity;
 	gameObject.uuid = GenerateUUID();
+
+	auto& transform = _registry.emplace<Transform>(entity);
+	transform.position = XMFLOAT2{ 0.0f, 0.0f };
+	transform.rotation = 0.0f;
+	transform.scale = XMFLOAT2{ 1.0f, 1.0f };
 
 	return entity;
 }

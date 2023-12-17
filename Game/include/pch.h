@@ -17,8 +17,7 @@ using Microsoft::WRL::ComPtr;
 #include <XInput.h>
 
 #include <directxmath.h>
-using DirectX::XMFLOAT2;
-using DirectX::XMFLOAT3;
+using namespace DirectX;
 
 // Standard Library
 #include <ctime>
@@ -35,6 +34,9 @@ using DirectX::XMFLOAT3;
 #include "backends/imgui_impl_win32.h"
 #include "backends/imgui_impl_dx11.h"
 
+// Visit struct
+#include "visit_struct/visit_struct.hpp"
+
 // Else
 #include "stduuid/uuid.h"
 
@@ -42,4 +44,4 @@ using DirectX::XMFLOAT3;
 constexpr bool ENABLE_EDITOR = true;
 
 // ECS
-#include "engine/ecs.hpp"
+//#include "engine/ecs.hpp"

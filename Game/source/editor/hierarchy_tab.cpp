@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "editor/hierarchy_tab.hpp"
 #include <engine/gameobject.hpp>
+#include <engine/ecs.hpp>
 
 constexpr ImGuiTreeNodeFlags BASE_NODE_FLAGS = 
 	ImGuiTreeNodeFlags_OpenOnArrow | 

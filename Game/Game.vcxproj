@@ -154,6 +154,7 @@
     <ClInclude Include="include\engine\IRenderable.h" />
     <ClInclude Include="include\engine\IShader.h" />
     <ClInclude Include="include\engine\ITexture.h" />
+    <ClInclude Include="include\engine\transform.hpp" />
     <ClInclude Include="include\engine\Transform2D.h" />
     <ClInclude Include="include\game\Game.h" />
     <ClInclude Include="include\pch.h" />

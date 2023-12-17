@@ -6,6 +6,7 @@
 #include "Engine/IShader.h"
 #include "Engine/IRenderable.h"
 #include "Engine/IInput.h"
+#include <engine/ecs.hpp>
 
 #define CLAMP(v, x, y) fmin(fmax(v, x), y)
 
