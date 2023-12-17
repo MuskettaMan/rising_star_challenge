@@ -101,6 +101,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\engine\editor\editor.cpp" />
     <ClCompile Include="source\engine\IApplication.cpp" />
     <ClCompile Include="source\engine\IGraphics.cpp" />
     <ClCompile Include="source\engine\IInput.cpp" />
@@ -123,6 +124,7 @@
     <ClCompile Include="third_party\imgui\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\engine\editor\editor.hpp" />
     <ClInclude Include="include\engine\IApplication.h" />
     <ClInclude Include="include\engine\IGraphics.h" />
     <ClInclude Include="include\engine\IInput.h" />

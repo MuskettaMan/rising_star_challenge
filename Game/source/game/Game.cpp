@@ -58,10 +58,6 @@ bool Game::Load()
 
 void Game::Update()
 {
-	ImGui::Begin("Test");
-	//ImGui::Image(_graphics->GetBackBuffer(), ImVec2{300, 300});
-	ImGui::End();
-
 	// If mode is Setup game then set each ring to a random rotation
 	//if (_state == GameState::Setup)
 	//{

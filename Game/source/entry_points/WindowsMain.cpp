@@ -9,6 +9,7 @@
 #include "Engine/ITexture.h"
 #include "Engine/IShader.h"
 #include "Engine/IApplication.h"
+#include <engine/editor/editor.hpp>
 
 const char WindowClassName[] = "Star";
 const char WindowTitle[] = "Search for a Star 2024";
@@ -67,37 +68,40 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	msg.message = WM_NULL;
 	msg.wParam = -1;
 	{
-		std::shared_ptr<IGraphics> Graphics = std::make_shared<DirectX11Graphics>(hwnd);
-		std::shared_ptr<IInput> Input = std::make_shared<DirectXInput>();
-		std::unique_ptr<IApplication> Application = GetApplication(Graphics, Input);
+		std::shared_ptr<IGraphics> graphics = std::make_shared<DirectX11Graphics>(hwnd);
+		std::shared_ptr<IInput> input = std::make_shared<DirectXInput>();
+		std::unique_ptr<IApplication> application = GetApplication(graphics, input);
+		std::unique_ptr<Editor> editor = std::make_unique<Editor>(*graphics);
 
-		if (Graphics && Graphics->IsValid() && Application)
+		if (graphics && graphics->IsValid() && application)
 		{
-			Application->Load();
+			application->Load();
 
-			while (msg.message != WM_QUIT && Application->IsValid())
+			while (msg.message != WM_QUIT && application->IsValid())
 			{
 				if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 				{
 					TranslateMessage(&msg);
 					DispatchMessage(&msg);
 				}
-				Graphics->BeginUpdate();
+				graphics->BeginUpdate();
 
 				ImGui_ImplWin32_NewFrame();
 				ImGui::NewFrame();
 
-				Input->Update();
-				Application->Update();
+				input->Update();
+				application->Update();
 
-				Graphics->Update();
+				graphics->Update();
+
+				editor->Update();
 
 				ImGui::Render();
-				Graphics->EndUpdate();
+				graphics->EndUpdate();
 			}
 
 
-			Application->Cleanup();
+			application->Cleanup();
 		}
 	}
 

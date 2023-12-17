@@ -3,6 +3,7 @@
 
 #include <map>
 #include <list>
+#include <memory>
 
 class IRenderable;
 class IShader;
@@ -24,7 +25,7 @@ public:
 	virtual std::shared_ptr<IShader> CreateShader(const wchar_t* filepath, const char* vsentry, const char* vsshader, const char* psentry, const char* psshader, std::shared_ptr<ITexture> TextureIn) = 0;
 	virtual std::shared_ptr<IRenderable> CreateBillboard(std::shared_ptr<IShader> ShaderIn) = 0;
 
-	virtual std::shared_ptr<ITexture> GetBackBuffer() const = 0;
+	virtual void* GetBackBuffer() const = 0;
 
 
 protected:

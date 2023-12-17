@@ -97,34 +97,40 @@ DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(n
         _device->CreateBlendState(&Desc, &_blendState);
     }
 
+    DXGI_SAMPLE_DESC sampleDesc;
+    ZeroMemory(&sampleDesc, sizeof(sampleDesc));
+    sampleDesc.Count = 1;
+    sampleDesc.Quality = 0;
 
-    /*ComPtr<ID3D11Texture2D> texture = nullptr;
     D3D11_TEXTURE2D_DESC texDesc;
     ZeroMemory(&texDesc, sizeof(texDesc));
     texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    texDesc.Width = 500;
-    texDesc.Height = 500;
-    _device->CreateTexture2D(&texDesc, nullptr, texture.GetAddressOf());
-    
-    ComPtr<ID3D11ShaderResourceView> shaderResourceView;
+    texDesc.Usage = D3D11_USAGE_DEFAULT;
+    texDesc.Width = 1920;
+    texDesc.Height = 1080;
+    texDesc.CPUAccessFlags = 0;
+    texDesc.ArraySize = 1;
+    texDesc.SampleDesc = sampleDesc;
+    texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    texDesc.MiscFlags = 0;
+    texDesc.MipLevels = 1;
+    _device->CreateTexture2D(&texDesc, nullptr, _renderTargetTexture.GetAddressOf());
+
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
     ZeroMemory(&srvDesc, sizeof(srvDesc));
-    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-    _device->CreateShaderResourceView(texture.Get(), &srvDesc, shaderResourceView.GetAddressOf());
+    srvDesc.Format = texDesc.Format;
+    srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MostDetailedMip = 0;
+    srvDesc.Texture2D.MipLevels = 1;
+    _device->CreateShaderResourceView(_renderTargetTexture.Get(), &srvDesc, _renderTargetSRV.GetAddressOf());
+    
+    D3D11_RENDER_TARGET_VIEW_DESC rtvDescription;
+    ZeroMemory(&rtvDescription, sizeof(rtvDescription));
+    rtvDescription.Format = texDesc.Format;
+    rtvDescription.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+    rtvDescription.Texture2D.MipSlice = 0;
 
-    ComPtr<ID3D11SamplerState> sampler = nullptr;
-    D3D11_SAMPLER_DESC colorMapDesc;
-    ZeroMemory(&colorMapDesc, sizeof(colorMapDesc));
-    colorMapDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-    colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-    colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-    colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-    colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-    colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-    _device->CreateSamplerState(&colorMapDesc, sampler.GetAddressOf());*/
-
-    //_renderTargetTexture = std::make_shared<DirectX11Texture>(_context, texture, sampler, texDesc);
+    _device->CreateRenderTargetView(_renderTargetTexture.Get(), &rtvDescription, _renderTargetView.GetAddressOf());
 
     ImGui_ImplDX11_Init(_device.Get(), _context.Get());
 }
@@ -146,6 +152,7 @@ void DirectX11Graphics::Update()
 
         float clearColour[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
         _context->ClearRenderTargetView(_backbufferView.Get(), clearColour);
+        //_context->ClearRenderTargetView(_renderTargetView.Get(), clearColour);
 
         D3D11_VIEWPORT viewport;
         viewport.Width = static_cast<float>(_windowWidth);
@@ -156,7 +163,8 @@ void DirectX11Graphics::Update()
         viewport.TopLeftY = 0.0f;
         _context->RSSetViewports(1, &viewport);
 
-        _context->OMSetRenderTargets(1, _backbufferView.GetAddressOf(), NULL);
+        //_context->OMSetRenderTargets(1, _backbufferView.GetAddressOf(), NULL);
+        _context->OMSetRenderTargets(1, _renderTargetView.GetAddressOf(), nullptr);
 
         for (auto bucket = _renderables.begin(); bucket != _renderables.end(); ++bucket)
         {
@@ -165,10 +173,12 @@ void DirectX11Graphics::Update()
             for (auto renderable = bucket->second.begin(); renderable != bucket->second.end(); ++renderable)
             {
                 SetWorldMatrix((*renderable)->GetTransform());
-                _context->OMSetBlendState(_blendState.Get(), NULL, ~0U);
+                _context->OMSetBlendState(_blendState.Get(), nullptr, ~0U);
                 (*renderable)->Update();
             }
         }
+
+        _context->OMSetRenderTargets(1, _backbufferView.GetAddressOf(), nullptr);
     }
 }
 

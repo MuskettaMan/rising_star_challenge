@@ -21,6 +21,6 @@ private:
 	ComPtr<ID3D11Buffer> _indexBuffer;
 	unsigned int _vertexStride;
 	unsigned int _vertexOffset{0};
-	unsigned int _vertexCount{4};
+	unsigned int _vertexCount{6};
 };
 
