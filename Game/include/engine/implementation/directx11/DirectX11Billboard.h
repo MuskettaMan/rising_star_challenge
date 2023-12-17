@@ -11,15 +11,16 @@ class DirectX11Billboard : public IRenderable
 {
 public:
 
-	DirectX11Billboard(const ComPtr<ID3D11DeviceContext> context, ComPtr<ID3D11Buffer> vertexBuffer, unsigned int vertexStride, unsigned int vertexOffset, unsigned int vertexCount);
+	DirectX11Billboard(const ComPtr<ID3D11DeviceContext> context, ComPtr<ID3D11Buffer> vertexBuffer, ComPtr<ID3D11Buffer> indexBuffer, unsigned int vertexStride);
 	virtual void Update();
 
 private:
 
 	const ComPtr<ID3D11DeviceContext> _context;
 	ComPtr<ID3D11Buffer> _vertexBuffer;
+	ComPtr<ID3D11Buffer> _indexBuffer;
 	unsigned int _vertexStride;
-	unsigned int _vertexOffset;
-	unsigned int _vertexCount;
+	unsigned int _vertexOffset{0};
+	unsigned int _vertexCount{4};
 };
 

@@ -8,6 +8,7 @@ public:
 	virtual void Update() = 0;
 	virtual float GetWidth() const = 0;
 	virtual float GetHeight() const = 0;
+	virtual void* GetTexturePtr() const = 0;
 
 };
 

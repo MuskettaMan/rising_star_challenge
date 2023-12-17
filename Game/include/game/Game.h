@@ -37,5 +37,7 @@ private:
 	std::shared_ptr<IRenderable> _arrow;
 	RingLayer _selectedRing;
 	GameState _state;
+
+	std::shared_ptr<ITexture> innerTexture;
 };
 

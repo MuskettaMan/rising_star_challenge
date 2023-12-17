@@ -35,7 +35,7 @@ bool Game::IsValid()
 
 bool Game::Load()
 {
-	std::shared_ptr<ITexture> innerTexture = _graphics->CreateTexture(L"resource/textures/InnerRing.dds");
+	innerTexture = _graphics->CreateTexture(L"resource/textures/InnerRing.dds");
 	std::shared_ptr<ITexture> middleTexture = _graphics->CreateTexture(L"resource/textures/MiddleRing.dds");
 	std::shared_ptr<ITexture> outerTexture = _graphics->CreateTexture(L"resource/textures/OuterRing.dds");
 	std::shared_ptr<ITexture> arrowTexture = _graphics->CreateTexture(L"resource/textures/Arrow.dds");
@@ -58,27 +58,31 @@ bool Game::Load()
 
 void Game::Update()
 {
+	ImGui::Begin("Test");
+	//ImGui::Image(_graphics->GetBackBuffer(), ImVec2{300, 300});
+	ImGui::End();
+
 	// If mode is Setup game then set each ring to a random rotation
-	if (_state == GameState::Setup)
-	{
-		SetupEachRing();
-		_state = GameState::Playing;
-	}
+	//if (_state == GameState::Setup)
+	//{
+	//	SetupEachRing();
+	//	_state = GameState::Playing;
+	//}
 
-	// If mode is Playing then read controller input and manage which ring is selected, the rotation of each ring and waiting for select to confirm positions 
-	if (_state == GameState::Playing)
-	{
-		UpdateRingSelection();
-		UpdateSelectedRingRotation();
-		UpdateRingTestSelection();
-	}
+	//// If mode is Playing then read controller input and manage which ring is selected, the rotation of each ring and waiting for select to confirm positions 
+	//if (_state == GameState::Playing)
+	//{
+	//	UpdateRingSelection();
+	//	UpdateSelectedRingRotation();
+	//	UpdateRingTestSelection();
+	//}
 
-	// If mode is Test then check to see if the rings are in their correct positions, play a noise corresponding to how close the player is 
-	if (_state == GameState::Test)
-	{
-		TestRingSolution();
-		_state = GameState::Setup;
-	}
+	//// If mode is Test then check to see if the rings are in their correct positions, play a noise corresponding to how close the player is 
+	//if (_state == GameState::Test)
+	//{
+	//	TestRingSolution();
+	//	_state = GameState::Setup;
+	//}
 }
 
 void Game::Cleanup()
