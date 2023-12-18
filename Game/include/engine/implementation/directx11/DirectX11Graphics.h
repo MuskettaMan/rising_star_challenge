@@ -61,7 +61,6 @@ private:
 	ComPtr<ID3D11RenderTargetView> _renderTextureRTV;
 
 	ComPtr<ID3D11Buffer> _mvp;
-	DirectX::XMMATRIX _vpMatrix;
 	D3D_FEATURE_LEVEL _featureLevel;
 	HWND _hwnd;
 	uint32_t _windowWidth;

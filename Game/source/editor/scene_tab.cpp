@@ -18,6 +18,7 @@ void SceneTab::DrawContents()
 	ImVec2 newSize{ windowSize };
 	ImVec2 dummySpace{ 0.0f, 0.0f };
 
+
 	if (aspectRatioWindow > aspectRatioDisplay)
 	{
 		newSize.x = windowSize.y * aspectRatioDisplay;
@@ -32,5 +33,14 @@ void SceneTab::DrawContents()
 		ImGui::Dummy(dummySpace);
 	}
 
+	ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
+	ImVec2 cursorScreenPos{ ImGui::GetCursorScreenPos() };
+	ImGuizmo::SetRect(cursorScreenPos.x, cursorScreenPos.y, newSize.x, newSize.y);
+
 	ImGui::Image(_graphics.GetRenderTextureSRV(), newSize);
+}
+
+void SceneTab::DrawHandle(entt::entity entity)
+{
+	// TODO: Require camera matrices and gameobject matrices.
 }

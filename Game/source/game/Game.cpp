@@ -7,6 +7,8 @@
 #include "Engine/IRenderable.h"
 #include "Engine/IInput.h"
 #include <engine/ecs.hpp>
+#include <engine/camera.hpp>
+#include <engine/transform.hpp>
 
 #define CLAMP(v, x, y) fmin(fmax(v, x), y)
 
@@ -36,8 +38,9 @@ bool Game::IsValid()
 
 bool Game::Load()
 {
-	ECS::Instance().CreateGameObject("Test 1");
-	ECS::Instance().CreateGameObject("My GameObject");
+	entt::entity cameraEntity = ECS::Instance().CreateGameObject("Camera");
+	ECS::Instance().Registry().emplace<Camera>(cameraEntity);
+	ECS::Instance().Registry().emplace<CameraMatrix>(cameraEntity);
 
 	innerTexture = _graphics->CreateTexture(L"assets\\textures\\InnerRing.dds");
 	std::shared_ptr<ITexture> middleTexture = _graphics->CreateTexture(L"assets\\textures\\MiddleRing.dds");
@@ -62,6 +65,7 @@ bool Game::Load()
 
 void Game::Update()
 {
+	UpdateMatrices();
 	// If mode is Setup game then set each ring to a random rotation
 	//if (_state == GameState::Setup)
 	//{
@@ -153,5 +157,18 @@ void Game::TestRingSolution()
 	else
 	{
 		// Lose
+	}
+}
+
+void Game::UpdateMatrices()
+{
+	auto view = ECS::Instance().Registry().view<Transform, TransformMatrix>();
+	for (auto entity : view)
+	{
+		auto [transform, transformMatrix] = view.get(entity);
+		DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(transform.position.x, transform.position.y, 0.0f);
+		DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationZ(transform.rotation);
+		DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, 1.0f);
+		transformMatrix.worldMatrix = scale * rotation * translation;
 	}
 }

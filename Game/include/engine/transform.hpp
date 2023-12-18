@@ -9,4 +9,9 @@ struct Transform
 	XMFLOAT2 scale{ 1.0f, 1.0f };
 };
 
+struct TransformMatrix
+{
+	XMMATRIX worldMatrix;
+};
+
 VISITABLE_STRUCT(Transform, position, rotation, scale);

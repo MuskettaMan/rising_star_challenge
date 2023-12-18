@@ -2,6 +2,7 @@
 #include "engine/ecs.hpp"
 #include <engine/gameobject.hpp>
 #include "engine/transform.hpp"
+#include <engine/camera.hpp>
 
 ECS& ECS::Instance()
 {
@@ -27,7 +28,24 @@ entt::entity ECS::CreateGameObject(const std::string& name)
 	transform.rotation = 0.0f;
 	transform.scale = XMFLOAT2{ 1.0f, 1.0f };
 
+	auto& transformMatrix = _registry.emplace<TransformMatrix>(entity);
+	transformMatrix.worldMatrix = XMMatrixIdentity();
+
 	return entity;
+}
+
+Camera& ECS::GetCamera()
+{
+	auto view = _registry.view<Camera>();
+	entt::entity entity = *view.begin();
+	return view.get<Camera>(entity);
+}
+
+CameraMatrix& ECS::GetCameraMatrix()
+{
+	auto view = _registry.view<CameraMatrix>();
+	entt::entity entity = *view.begin();
+	return view.get<CameraMatrix>(entity);
 }
 
 uuids::uuid ECS::GenerateUUID()

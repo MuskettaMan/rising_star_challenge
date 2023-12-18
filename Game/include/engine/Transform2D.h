@@ -1,6 +1,5 @@
 #pragma once
 
-
 struct Transform2D
 {
 	XMFLOAT2 position{ 0.0f, 0.0f };

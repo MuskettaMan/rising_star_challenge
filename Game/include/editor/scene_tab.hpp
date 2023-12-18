@@ -14,4 +14,6 @@ protected:
 
 private:
 	IGraphics& _graphics;
+
+	void DrawHandle(entt::entity entity);
 };

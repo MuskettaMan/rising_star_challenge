@@ -5,17 +5,17 @@
 
 inline void InspectValue(const char* name, float& member)
 {
-    ImGui::InputFloat2(name, &member);
+    ImGui::DragFloat(name, &member, 0.05);
 }
 
 inline void InspectValue(const char* name, XMFLOAT2& member)
 {
-    ImGui::InputFloat2(name, &member.x);
+    ImGui::DragFloat2(name, &member.x, 0.05);
 }
 
 inline void InspectValue(const char* name, XMFLOAT3& member)
 {
-    ImGui::InputFloat3(name, &member.x);
+    ImGui::DragFloat3(name, &member.x, 0.05);
 }
 
 struct DrawObject

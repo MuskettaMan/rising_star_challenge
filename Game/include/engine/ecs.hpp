@@ -1,5 +1,8 @@
 #pragma once
 
+struct Camera;
+struct CameraMatrix;
+
 class ECS
 {
 public:
@@ -14,6 +17,8 @@ public:
 	entt::registry& Registry() { return _registry; }
 	entt::entity CreateEntity();
 	entt::entity CreateGameObject(const std::string& name);
+	Camera& GetCamera();
+	CameraMatrix& GetCameraMatrix();
 
 private:
 	ECS() = default;

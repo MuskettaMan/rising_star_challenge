@@ -4,8 +4,11 @@
 #include "engine/implementation/directx11/DirectX11Billboard.h"
 #include "engine/implementation/directx11/DirectX11Shader.h"
 #include "engine/implementation/directx11/DirectX11Texture.h"
+#include <engine/camera.hpp>
+#include <engine/ecs.hpp>
+#include <engine/transform.hpp>
 
-DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferRTV(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _vpMatrix(), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0)
+DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferRTV(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0)
 {
     RECT dimensions;
     GetClientRect(_hwnd, &dimensions);
@@ -72,12 +75,6 @@ DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(n
             MessageBox(NULL, "Graphics Failed to create MVP Buffer", "Error!", MB_ICONEXCLAMATION | MB_OK);
         }
 
-        float halfWidth = static_cast<float>(_windowWidth / 2);
-        float halfHeight = static_cast<float>(_windowHeight / 2);
-        DirectX::XMMATRIX view = DirectX::XMMatrixIdentity();
-        DirectX::XMMATRIX projection = DirectX::XMMatrixOrthographicOffCenterLH(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.1f, 10.1f);
-        _vpMatrix = DirectX::XMMatrixMultiply(view, projection);
-
         D3D11_BLEND_DESC Desc;
         ZeroMemory(&Desc, sizeof(D3D11_BLEND_DESC));
         Desc.RenderTarget[0].BlendEnable = TRUE;
@@ -104,6 +101,18 @@ DirectX11Graphics::~DirectX11Graphics()
 void DirectX11Graphics::BeginUpdate()
 {
     ImGui_ImplDX11_NewFrame();
+
+    auto view = ECS::Instance().Registry().view<Camera, CameraMatrix, TransformMatrix>();
+    entt::entity entity = *view.begin();
+    auto [camera, cameraMatrix, transformMatrix] = view.get(entity);
+
+    float halfWidth = static_cast<float>(_windowWidth / 2) * camera.size;
+    float halfHeight = static_cast<float>(_windowHeight / 2) * camera.size;
+
+    transformMatrix.worldMatrix *= XMMatrixTranslationFromVector(XMVECTOR{ 0, 0, -10.0f });
+    XMVECTOR determinant = XMMatrixDeterminant(transformMatrix.worldMatrix);
+    cameraMatrix.view = DirectX::XMMatrixInverse(&determinant, transformMatrix.worldMatrix);
+    cameraMatrix.projection = DirectX::XMMatrixOrthographicOffCenterLH(-halfWidth, halfWidth, -halfHeight, halfHeight, camera.nearPlane, camera.farPlane);
 }
 
 void DirectX11Graphics::Update()
@@ -335,21 +344,18 @@ void DirectX11Graphics::SetScreenSize(uint32_t width, uint32_t height)
 
     SetupBackBuffer();
     //SetupRenderTexture();
-
-    float halfWidth = static_cast<float>(width / 2);
-    float halfHeight = static_cast<float>(height / 2);
-    DirectX::XMMATRIX view = DirectX::XMMatrixIdentity();
-    DirectX::XMMATRIX projection = DirectX::XMMatrixOrthographicOffCenterLH(-halfWidth, halfWidth, -halfHeight, halfHeight, 0.1f, 10.1f);
-    _vpMatrix = DirectX::XMMatrixMultiply(view, projection);
 }
 
 void DirectX11Graphics::SetWorldMatrix(const Transform2D& transform)
 {
-    DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(transform.position.x, transform.position.y, 10.0f);
+    Camera& camera = ECS::Instance().GetCamera();
+    CameraMatrix& cameraMatrix = ECS::Instance().GetCameraMatrix();
+
+    DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(transform.position.x, transform.position.y, 0.0f);
     DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationZ(transform.rotation);
     DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, 1.0f);
     DirectX::XMMATRIX world = scale * rotation * translation;
-    DirectX::XMMATRIX mvp = DirectX::XMMatrixMultiply(world, _vpMatrix);
+    DirectX::XMMATRIX mvp = DirectX::XMMatrixMultiply(world, DirectX::XMMatrixMultiply(cameraMatrix.view, cameraMatrix.projection));
     mvp = DirectX::XMMatrixTranspose(mvp);
     _context->UpdateSubresource(_mvp.Get(), 0, 0, &mvp, 0, 0);
     _context->VSSetConstantBuffers(0, 1, _mvp.GetAddressOf());
