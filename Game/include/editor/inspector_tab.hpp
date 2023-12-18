@@ -36,14 +36,17 @@ public:
 protected:
 	virtual void DrawContents() override;
 
+
 private:
 	entt::entity& _selectedEntity;
+
+    const std::string& GetIcon(size_t typeID) const;
 
     template <typename T>
     void InspectObject(T& obj)
     {
-        const char* typeName = visit_struct::get_name<T>();
-        if (ImGui::CollapsingHeader(typeName, nullptr, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth))
+        std::string typeName = visit_struct::get_name<T>();
+        if (ImGui::CollapsingHeader((typeName + "   " + GetIcon(typeid(T).hash_code())).c_str(), nullptr, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth))
         {
             visit_struct::for_each(obj, DrawObject{});
         }

@@ -27,6 +27,7 @@ using namespace DirectX;
 #include <array>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 // ImGui
 #include "imgui.h"
