@@ -27,7 +27,7 @@ std::unique_ptr<IApplication> GetApplication(std::shared_ptr<IGraphics> graphics
 	return std::make_unique<Game>(graphics, input);
 }
 
-Game::Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input) : IApplication(graphics, input), _rings(), _arrow(nullptr), _selectedRing(), _state()
+Game::Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input) : IApplication(graphics, input)
 {
 }
 
@@ -48,27 +48,9 @@ bool Game::Load()
 
 	entt::entity spriteEntity = ECS::Instance().CreateGameObject("Sprite renderer");
 	auto& spriteRenderer = ECS::Instance().Registry().emplace<SpriteRenderer>(spriteEntity);
-	spriteRenderer.texture = _graphics->CreateTexture2(L"assets\\textures\\sprite.dds");
-	spriteRenderer.shader = _graphics->CreateShader2(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0");
-	spriteRenderer.mesh = _graphics->CreateBillboard2(512, 512);
-
-	innerTexture = _graphics->CreateTexture(L"assets\\textures\\InnerRing.dds");
-	std::shared_ptr<ITexture> middleTexture = _graphics->CreateTexture(L"assets\\textures\\MiddleRing.dds");
-	std::shared_ptr<ITexture> outerTexture = _graphics->CreateTexture(L"assets\\textures\\OuterRing.dds");
-	std::shared_ptr<ITexture> arrowTexture = _graphics->CreateTexture(L"assets\\textures\\Arrow.dds");
-	std::shared_ptr<IShader> innerShader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", innerTexture);
-	std::shared_ptr<IShader> middleShader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", middleTexture);
-	std::shared_ptr<IShader> outerShader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", outerTexture);
-	std::shared_ptr<IShader> arrowShader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0", arrowTexture);
-	_rings[static_cast<unsigned int>(RingLayer::Inner)] = _graphics->CreateBillboard(innerShader);
-	_rings[static_cast<unsigned int>(RingLayer::Middle)] = _graphics->CreateBillboard(middleShader);
-	_rings[static_cast<unsigned int>(RingLayer::Outer)] = _graphics->CreateBillboard(outerShader);
-	_arrow = _graphics->CreateBillboard(arrowShader);
-
-	std::srand(static_cast<unsigned int>(std::time(0)));
-
-	_selectedRing = RingLayer::Outer;
-	_state = GameState::Setup;
+	spriteRenderer.texture = _graphics->CreateTexture(L"assets\\textures\\sprite.dds");
+	spriteRenderer.shader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0");
+	spriteRenderer.mesh = _graphics->CreateBillboard(512, 512);
 
 	return true;
 }
@@ -76,98 +58,11 @@ bool Game::Load()
 void Game::Update()
 {
 	UpdateMatrices();
-	// If mode is Setup game then set each ring to a random rotation
-	//if (_state == GameState::Setup)
-	//{
-	//	SetupEachRing();
-	//	_state = GameState::Playing;
-	//}
-
-	//// If mode is Playing then read controller input and manage which ring is selected, the rotation of each ring and waiting for select to confirm positions 
-	//if (_state == GameState::Playing)
-	//{
-	//	UpdateRingSelection();
-	//	UpdateSelectedRingRotation();
-	//	UpdateRingTestSelection();
-	//}
-
-	//// If mode is Test then check to see if the rings are in their correct positions, play a noise corresponding to how close the player is 
-	//if (_state == GameState::Test)
-	//{
-	//	TestRingSolution();
-	//	_state = GameState::Setup;
-	//}
 }
 
 void Game::Cleanup()
 {
 
-}
-
-void Game::SetupEachRing()
-{
-	for (unsigned int Ring = 0; Ring < NumberOfRings; ++Ring)
-	{
-		_rings[Ring]->SetRotation(static_cast<float>(fmod(rand(), PI)));
-	}
-
-	_arrow->SetRotation(static_cast<float>(fmod(rand(), PI)));
-}
-
-void Game::UpdateRingSelection()
-{
-	int selectionChange = 0;
-
-	if (_input->IsPressed(InputAction::ShoulderButtonLeft))
-	{
-		// Change ring selection towards outer
-		selectionChange = -1;
-	}
-	else if (_input->IsPressed(InputAction::ShoulderButtonRight))
-	{
-		// Change ring selection towards inner
-		selectionChange = 1;
-	}
-		
-	_selectedRing = static_cast<RingLayer>(CLAMP(static_cast<int>(_selectedRing) + selectionChange, 0, NumberOfRings - 1));
-}
-
-void Game::UpdateSelectedRingRotation()
-{
-	float delta = _input->GetValue(InputAction::RightStickXAxis) * SpinSpeed * DeltaTime;
-	float rotation = _rings[static_cast<int>(_selectedRing)]->GetTransform().rotation;
-	float newRotation = static_cast<float>(fmod(rotation + delta, TWO_PI));
-	_rings[static_cast<int>(_selectedRing)]->SetRotation(newRotation);
-}
-
-void Game::UpdateRingTestSelection()
-{
-	if (_input->IsPressed(InputAction::DefaultSelect))
-	{
-		_state = GameState::Test;
-	}
-}
-
-void Game::TestRingSolution()
-{
-	float totalRotationDifference = 0.0f;
-	float arrowRotation = _arrow->GetTransform().rotation + TWO_PI;
-
-	for (unsigned int Ring = 0; Ring < NumberOfRings; ++Ring)
-	{
-		totalRotationDifference += abs(arrowRotation - (_rings[Ring]->GetTransform().rotation + TWO_PI));
-	}
-
-	float averageRotationDifference = totalRotationDifference / NumberOfRings;
-
-	if (averageRotationDifference < WinTolerance)
-	{
-		// Win
-	}
-	else
-	{
-		// Lose
-	}
 }
 
 void Game::UpdateMatrices()
@@ -176,19 +71,9 @@ void Game::UpdateMatrices()
 	for (auto entity : view)
 	{
 		auto [transform, transformMatrix] = view.get(entity);
-		DirectX::XMMATRIX translation = DirectX::XMMatrixTranslation(transform.position.x, transform.position.y, 0.0f);
-		DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationZ(transform.rotation);
-		DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, 1.0f);
+		DirectX::XMMATRIX translation = XMMatrixTranslation(transform.position.x, transform.position.y, 0.0f);
+		DirectX::XMMATRIX rotation = XMMatrixRotationZ(transform.rotation);
+		DirectX::XMMATRIX scale = XMMatrixScaling(transform.scale.x, transform.scale.y, 1.0f);
 		transformMatrix.worldMatrix = scale * rotation * translation;
-	}
-}
-
-void Game::UpdateSpriteRenderers()
-{
-	auto view = ECS::Instance().Registry().view<SpriteRenderer>();
-	for (auto entity : view)
-	{
-		auto [spriteRenderer] = view.get(entity);
-
 	}
 }

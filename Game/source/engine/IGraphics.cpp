@@ -5,12 +5,10 @@
 #include "engine/IRenderable.h"
 
 
-IGraphics::IGraphics() : _renderables(), _textures()
+IGraphics::IGraphics() 
 {
 }
 
 IGraphics::~IGraphics()
 {
-    _renderables.clear();
-    _textures.clear();
 }
