@@ -2,7 +2,6 @@
 #include "editor/inspector_tab.hpp"
 #include <engine/gameobject.hpp>
 #include <engine/camera.hpp>
-#include <engine/ecs.hpp>
 #include "engine/transform.hpp"
 #include "visit_struct/visit_struct.hpp"
 #include "IconsFontAwesome6.h"
@@ -30,10 +29,8 @@ void InspectorTab::DrawContents()
 			std::strcpy(gameObject.name.data(), nameBuffer);
 		}
 
-		Transform& transform = ECS::Instance().Registry().get<Transform>(_selectedEntity);
-		Camera& camera = ECS::Instance().Registry().get<Camera>(_selectedEntity);
-		InspectObject(transform);
-		InspectObject(camera);
+		TryInspect<Transform>(_selectedEntity);
+		TryInspect<Camera>(_selectedEntity);
 	}
 }
 

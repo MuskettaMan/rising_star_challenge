@@ -2,6 +2,10 @@
 
 #include "editor/base_tab.hpp"
 #include "visit_struct/visit_struct.hpp"
+#include <engine/ecs.hpp>
+
+struct Transform;
+struct Camera;
 
 inline void InspectValue(const char* name, float& member)
 {
@@ -41,6 +45,14 @@ private:
 	entt::entity& _selectedEntity;
 
     const std::string& GetIcon(size_t typeID) const;
+
+    template <typename T>
+    void TryInspect(entt::entity entity)
+    {
+        T* component = ECS::Instance().Registry().try_get<T>(_selectedEntity);
+        if (component)
+            InspectObject(*component);
+    }
 
     template <typename T>
     void InspectObject(T& obj)
