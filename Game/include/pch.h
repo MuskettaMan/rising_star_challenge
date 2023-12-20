@@ -28,6 +28,8 @@ using namespace DirectX;
 #include <vector>
 #include <string>
 #include <unordered_map>
+#include <numeric>
+#include <limits>
 
 // ImGui
 #include "imgui.h"
@@ -47,3 +49,6 @@ constexpr bool ENABLE_EDITOR = true;
 
 // ECS
 //#include "engine/ecs.hpp"
+
+
+#include "engine/resource_handle.hpp"

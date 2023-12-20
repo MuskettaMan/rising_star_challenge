@@ -33,6 +33,7 @@ private:
 	void TestRingSolution();
 
 	void UpdateMatrices();
+	void UpdateSpriteRenderers();
 
 	std::shared_ptr<IRenderable> _rings[NumberOfRings];
 	std::shared_ptr<IRenderable> _arrow;

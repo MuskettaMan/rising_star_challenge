@@ -9,6 +9,10 @@
 #include <engine/ecs.hpp>
 #include <engine/camera.hpp>
 #include <engine/transform.hpp>
+#include <engine/sprite_renderer.hpp>
+#include "entt/core/hashed_string.hpp"
+
+using namespace entt::literals;
 
 #define CLAMP(v, x, y) fmin(fmax(v, x), y)
 
@@ -41,6 +45,12 @@ bool Game::Load()
 	entt::entity cameraEntity = ECS::Instance().CreateGameObject("Camera");
 	ECS::Instance().Registry().emplace<Camera>(cameraEntity);
 	ECS::Instance().Registry().emplace<CameraMatrix>(cameraEntity);
+
+	entt::entity spriteEntity = ECS::Instance().CreateGameObject("Sprite renderer");
+	auto& spriteRenderer = ECS::Instance().Registry().emplace<SpriteRenderer>(spriteEntity);
+	spriteRenderer.texture = _graphics->CreateTexture2(L"assets\\textures\\sprite.dds");
+	spriteRenderer.shader = _graphics->CreateShader2(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0");
+	spriteRenderer.mesh = _graphics->CreateBillboard2(512, 512);
 
 	innerTexture = _graphics->CreateTexture(L"assets\\textures\\InnerRing.dds");
 	std::shared_ptr<ITexture> middleTexture = _graphics->CreateTexture(L"assets\\textures\\MiddleRing.dds");
@@ -170,5 +180,15 @@ void Game::UpdateMatrices()
 		DirectX::XMMATRIX rotation = DirectX::XMMatrixRotationZ(transform.rotation);
 		DirectX::XMMATRIX scale = DirectX::XMMatrixScaling(transform.scale.x, transform.scale.y, 1.0f);
 		transformMatrix.worldMatrix = scale * rotation * translation;
+	}
+}
+
+void Game::UpdateSpriteRenderers()
+{
+	auto view = ECS::Instance().Registry().view<SpriteRenderer>();
+	for (auto entity : view)
+	{
+		auto [spriteRenderer] = view.get(entity);
+
 	}
 }

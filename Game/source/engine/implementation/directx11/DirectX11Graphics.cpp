@@ -2,11 +2,10 @@
 #include "engine/implementation/directx11/DirectX11Graphics.h"
 
 #include "engine/implementation/directx11/DirectX11Billboard.h"
-#include "engine/implementation/directx11/DirectX11Shader.h"
-#include "engine/implementation/directx11/DirectX11Texture.h"
 #include <engine/camera.hpp>
 #include <engine/ecs.hpp>
 #include <engine/transform.hpp>
+#include <engine/sprite_renderer.hpp>
 
 DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferRTV(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0)
 {
@@ -138,6 +137,28 @@ void DirectX11Graphics::Update()
 
         _context->OMSetRenderTargets(1, ENABLE_EDITOR ? _renderTextureRTV.GetAddressOf() : _backbufferRTV.GetAddressOf(), nullptr);
 
+
+        auto spriteRendererView = ECS::Instance().Registry().view<const SpriteRenderer>();
+        for (const entt::entity spriteRendererEntity : spriteRendererView)
+        {
+            auto [spriteRenderer]{spriteRendererView.get(spriteRendererEntity)};
+            const DirectX11Mesh& mesh = _meshes[spriteRenderer.mesh.Id()];
+            const DirectX11Shader2& shader = _shaders[spriteRenderer.shader.Id()];
+            const DirectX11Texture2& texture = _textures2[spriteRenderer.texture.Id()];
+
+            _context->IASetInputLayout(shader._inputLayout.Get());
+            _context->VSSetShader(shader._vertexShader.Get(), 0, 0);
+            _context->PSSetShader(shader._pixelShader.Get(), 0, 0);
+
+            _context->PSSetShaderResources(0, 1, texture._srv.GetAddressOf());
+            _context->PSSetSamplers(0, 1, texture._sampler.GetAddressOf());
+
+            _context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            _context->IASetIndexBuffer(mesh._indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+            _context->IASetVertexBuffers(0, 1, mesh._vertexBuffer.GetAddressOf(), &mesh._vertexStride, &mesh._vertexOffset);
+            _context->DrawIndexed(mesh._vertexCount, 0, 0);
+        }
+
         for (auto bucket = _renderables.begin(); bucket != _renderables.end(); ++bucket)
         {
             bucket->first->Update();
@@ -215,6 +236,48 @@ std::shared_ptr<ITexture> DirectX11Graphics::CreateTexture(const wchar_t* filepa
     return result;
 }
 
+ResourceHandle<Texture> DirectX11Graphics::CreateTexture2(const wchar_t* filepath)
+{
+    ComPtr<ID3D11ShaderResourceView> srv = nullptr;
+    ComPtr<ID3D11SamplerState> sampler = nullptr;
+    ComPtr<ID3D11Texture2D> texture = nullptr;
+    D3D11_TEXTURE2D_DESC description;
+
+    if (IsValid())
+    {
+        HRESULT hr = DirectX::CreateDDSTextureFromFile(_device.Get(), filepath, NULL, srv.GetAddressOf());
+
+        if (SUCCEEDED(hr))
+        {
+            D3D11_SAMPLER_DESC colorMapDesc;
+            ZeroMemory(&colorMapDesc, sizeof(colorMapDesc));
+            colorMapDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+            colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+            colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+            colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+            colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+            colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+            hr = _device->CreateSamplerState(&colorMapDesc, sampler.GetAddressOf());
+        }
+
+        if (SUCCEEDED(hr))
+        {
+            ComPtr<ID3D11Resource> textureResource;
+            srv->GetResource(textureResource.GetAddressOf());
+
+            textureResource.As(&texture);
+
+            texture->GetDesc(&description);
+
+            _textures2.emplace_back(DirectX11Texture2{ srv, sampler, texture, description });
+            return ResourceHandle<Texture>(_textures2.size() - 1);
+        }
+    }
+
+    return ResourceHandle<Texture>();
+}
+
 std::shared_ptr<IShader> DirectX11Graphics::CreateShader(const wchar_t* filepath, const char* vsentry, const char* vsshader, const char* psentry, const char* psshader, std::shared_ptr<ITexture> textureIn)
 {
     std::shared_ptr<IShader> result = nullptr;
@@ -262,6 +325,52 @@ std::shared_ptr<IShader> DirectX11Graphics::CreateShader(const wchar_t* filepath
     }
 
     return result;
+}
+
+ResourceHandle<Shader> DirectX11Graphics::CreateShader2(const wchar_t* filepath, const char* vsentry, const char* vsshader, const char* psentry, const char* psshader)
+{
+    ComPtr<ID3D11VertexShader> vertexShader = nullptr;
+    ComPtr<ID3D11PixelShader> pixelShader = nullptr;
+    ComPtr<ID3D11InputLayout> inputLayout = nullptr;
+    HRESULT hr = S_FALSE;
+
+    if (IsValid())
+    {
+        ComPtr<ID3DBlob> vsBuffer = nullptr;
+        if (CompileShader(filepath, vsentry, vsshader, vsBuffer.GetAddressOf()))
+        {
+            hr = _device->CreateVertexShader(vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(), 0, vertexShader.GetAddressOf());
+
+            if (SUCCEEDED(hr))
+            {
+                D3D11_INPUT_ELEMENT_DESC layout[] =
+                {
+                    {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                    {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+                };
+
+                unsigned int totalLayoutElements = ARRAYSIZE(layout);
+
+                hr = _device->CreateInputLayout(layout, totalLayoutElements, vsBuffer->GetBufferPointer(), vsBuffer->GetBufferSize(), inputLayout.GetAddressOf());
+            }
+        }
+
+        if (SUCCEEDED(hr))
+        {
+            ComPtr<ID3DBlob> psBuffer = nullptr;
+            hr = S_FALSE;
+            if (CompileShader(filepath, psentry, psshader, psBuffer.GetAddressOf()))
+            {
+                hr = _device->CreatePixelShader(psBuffer->GetBufferPointer(), psBuffer->GetBufferSize(), 0, pixelShader.GetAddressOf());
+
+                _shaders.emplace_back(vertexShader, pixelShader, inputLayout);
+                return ResourceHandle<Shader>(_shaders.size() - 1);
+            }
+        }
+    }
+
+
+    return ResourceHandle<Shader>();
 }
 
 std::shared_ptr<IRenderable> DirectX11Graphics::CreateBillboard(std::shared_ptr<IShader> shaderIn)
@@ -323,6 +432,63 @@ std::shared_ptr<IRenderable> DirectX11Graphics::CreateBillboard(std::shared_ptr<
     }
 
     return result;
+}
+
+ResourceHandle<Mesh> DirectX11Graphics::CreateBillboard2(float width, float height)
+{
+    std::shared_ptr<IRenderable> result = nullptr;
+
+    const float halfWidth = width / 2.0f;
+    const float halfHeight = height / 2.0f;
+
+    BillboardVertex vertex_data_array[] =
+    {
+        XMFLOAT3{ -halfWidth,  -halfHeight, 0.0f }, XMFLOAT2{ 0.0f, 0.0f },
+        XMFLOAT3{ halfWidth, -halfHeight, 0.0f }, XMFLOAT2{ 1.0f, 0.0f },
+        XMFLOAT3{ halfWidth, halfHeight, 0.0f }, XMFLOAT2{ 1.0f, 1.0f },
+        XMFLOAT3{ -halfWidth,  halfHeight, 0.0f }, XMFLOAT2{ 0.0f, 1.0f },
+    };
+
+    uint32_t index_data_array[] = {
+        2, 1, 0,
+        0, 3, 2
+    };
+
+    ComPtr<ID3D11Buffer> vertexBuffer;
+    ComPtr<ID3D11Buffer> indexBuffer;
+
+    unsigned int vertexStride = sizeof(BillboardVertex);
+
+    D3D11_BUFFER_DESC vertexDescription;
+    ZeroMemory(&vertexDescription, sizeof(vertexDescription));
+    vertexDescription.Usage = D3D11_USAGE_DEFAULT;
+    vertexDescription.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    vertexDescription.ByteWidth = sizeof(vertex_data_array);
+
+    D3D11_BUFFER_DESC indexDescription;
+    ZeroMemory(&indexDescription, sizeof(indexDescription));
+    indexDescription.Usage = D3D11_USAGE_DEFAULT;
+    indexDescription.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    indexDescription.ByteWidth = sizeof(index_data_array);
+
+    D3D11_SUBRESOURCE_DATA vertexResourceData;
+    ZeroMemory(&vertexResourceData, sizeof(vertexResourceData));
+    vertexResourceData.pSysMem = vertex_data_array;
+
+    D3D11_SUBRESOURCE_DATA indexResourceData;
+    ZeroMemory(&indexResourceData, sizeof(indexResourceData));
+    indexResourceData.pSysMem = index_data_array;
+
+    bool successVertexBuffer = SUCCEEDED(_device->CreateBuffer(&vertexDescription, &vertexResourceData, vertexBuffer.GetAddressOf()));
+    bool successIndexBuffer = SUCCEEDED(_device->CreateBuffer(&indexDescription, &indexResourceData, indexBuffer.GetAddressOf()));
+
+    if (successVertexBuffer && successIndexBuffer)
+    {
+        _meshes.emplace_back(vertexBuffer, indexBuffer, vertexStride);
+        return ResourceHandle<Mesh>(_meshes.size() - 1);
+    }
+
+    return ResourceHandle<Mesh>();
 }
 
 void DirectX11Graphics::SetScreenSize(uint32_t width, uint32_t height)

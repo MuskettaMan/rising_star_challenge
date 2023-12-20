@@ -27,3 +27,4 @@ float DirectX11Texture::GetHeight() const
 {
 	return static_cast<float>(_description.Height);
 }
+

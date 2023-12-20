@@ -1,7 +1,10 @@
 #pragma once
 
-#include "Engine/IGraphics.h"
-#include "Engine/Transform2D.h"
+#include "engine/IGraphics.h"
+#include "engine/Transform2D.h"
+#include "engine/implementation/directx11/DirectX11Shader.h"
+#include "engine/implementation/directx11/DirectX11Texture.h"
+#include "engine/implementation/directx11/DirectX11Mesh.h"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -31,8 +34,11 @@ public:
 	virtual bool IsValid();
 
 	virtual std::shared_ptr<ITexture> CreateTexture(const wchar_t* filepath);
+	ResourceHandle<Texture> CreateTexture2(const wchar_t* filepath) override;
 	virtual std::shared_ptr<IShader> CreateShader(const wchar_t* filepath, const char* vsentry, const char* vsshader, const char* psentry, const char* psshader, std::shared_ptr<ITexture> TextureIn);
+	ResourceHandle<Shader> CreateShader2(const wchar_t* filepath, const char* vsentry, const char* vsshader, const char* psentry, const char* psshader) override;
 	virtual std::shared_ptr<IRenderable> CreateBillboard(std::shared_ptr<IShader> ShaderIn);
+	ResourceHandle<Mesh> CreateBillboard2(float width, float height) override;
 
 	virtual void* GetRenderTextureSRV() const { return _renderTextureSRV.Get(); };
 	virtual void SetScreenSize(uint32_t width, uint32_t height);
@@ -70,5 +76,10 @@ private:
 	
 	HRESULT SetupBackBuffer();
 	void SetupRenderTexture();
+
+	// Pairs a texture with a handle counter.
+	std::vector<DirectX11Texture2> _textures2;
+	std::vector<DirectX11Mesh> _meshes;
+	std::vector<DirectX11Shader2> _shaders;
 };
 
