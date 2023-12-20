@@ -278,15 +278,15 @@ ResourceHandle<Mesh> DirectX11Graphics::CreateBillboard(float width, float heigh
 
     BillboardVertex vertex_data_array[] =
     {
-        XMFLOAT3{ -halfWidth,  -halfHeight, 0.0f }, XMFLOAT2{ 0.0f, 0.0f },
-        XMFLOAT3{ halfWidth, -halfHeight, 0.0f }, XMFLOAT2{ 1.0f, 0.0f },
-        XMFLOAT3{ halfWidth, halfHeight, 0.0f }, XMFLOAT2{ 1.0f, 1.0f },
-        XMFLOAT3{ -halfWidth,  halfHeight, 0.0f }, XMFLOAT2{ 0.0f, 1.0f },
+        XMFLOAT3{ -halfWidth,  -halfHeight, 0.0f }, XMFLOAT2{ 0.0f, 1.0f },
+        XMFLOAT3{ halfWidth, -halfHeight, 0.0f }, XMFLOAT2{ 1.0f, 1.0f },
+        XMFLOAT3{ -halfWidth,  halfHeight, 0.0f }, XMFLOAT2{ 0.0f, 0.0f },
+        XMFLOAT3{ halfWidth, halfHeight, 0.0f }, XMFLOAT2{ 1.0f, 0.0f },
     };
 
     uint32_t index_data_array[] = {
-        2, 1, 0,
-        0, 3, 2
+        0, 3, 1,
+        0, 2, 3
     };
 
     ComPtr<ID3D11Buffer> vertexBuffer;
@@ -353,6 +353,7 @@ void DirectX11Graphics::SetWorldMatrix(const TransformMatrix& transform)
     CameraMatrix& cameraMatrix = ECS::Instance().GetCameraMatrix();
 
     XMMATRIX mvp = XMMatrixMultiply(transform.worldMatrix, DirectX::XMMatrixMultiply(cameraMatrix.view, cameraMatrix.projection));
+    mvp = XMMatrixTranspose(mvp);
     _context->UpdateSubresource(_mvp.Get(), 0, 0, &mvp, 0, 0);
     _context->VSSetConstantBuffers(0, 1, _mvp.GetAddressOf());
 }

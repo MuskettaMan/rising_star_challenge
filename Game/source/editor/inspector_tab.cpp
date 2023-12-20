@@ -3,6 +3,7 @@
 #include <engine/gameobject.hpp>
 #include <engine/camera.hpp>
 #include "engine/transform.hpp"
+#include "engine/sprite_renderer.hpp"
 #include "visit_struct/visit_struct.hpp"
 #include "IconsFontAwesome6.h"
 #include <typeinfo>
@@ -31,6 +32,7 @@ void InspectorTab::DrawContents()
 
 		TryInspect<Transform>(_selectedEntity);
 		TryInspect<Camera>(_selectedEntity);
+		TryInspect<SpriteRenderer>(_selectedEntity);
 	}
 }
 

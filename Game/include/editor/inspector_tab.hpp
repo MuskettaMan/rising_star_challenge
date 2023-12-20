@@ -6,6 +6,7 @@
 
 struct Transform;
 struct Camera;
+struct SpriteRenderer;
 
 inline void InspectValue(const char* name, float& member)
 {
@@ -20,6 +21,13 @@ inline void InspectValue(const char* name, XMFLOAT2& member)
 inline void InspectValue(const char* name, XMFLOAT3& member)
 {
     ImGui::DragFloat3(name, &member.x, 0.05);
+}
+
+template <typename T>
+inline void InspectValue(const char* name, ResourceHandle<T>& member)
+{
+    int32_t id{ static_cast<int32_t>(member.Id())};
+    ImGui::DragInt(name, &id, 1);
 }
 
 struct DrawObject
@@ -58,7 +66,7 @@ private:
     void InspectObject(T& obj)
     {
         std::string typeName = visit_struct::get_name<T>();
-        if (ImGui::CollapsingHeader((typeName + "   " + GetIcon(typeid(T).hash_code())).c_str(), nullptr, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth))
+        if (ImGui::CollapsingHeader((GetIcon(typeid(T).hash_code()) + "   " + typeName).c_str(), nullptr, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth))
         {
             visit_struct::for_each(obj, DrawObject{});
         }

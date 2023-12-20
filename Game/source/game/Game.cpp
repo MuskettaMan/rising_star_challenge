@@ -46,10 +46,18 @@ bool Game::Load()
 	ECS::Instance().Registry().emplace<Camera>(cameraEntity);
 	ECS::Instance().Registry().emplace<CameraMatrix>(cameraEntity);
 
+	_graphics->CreateTexture(L"assets\\textures\\Arrow.dds");
+	_graphics->CreateTexture(L"assets\\textures\\InnerRing.dds");
+
+
 	entt::entity spriteEntity = ECS::Instance().CreateGameObject("Sprite renderer");
 	auto& spriteRenderer = ECS::Instance().Registry().emplace<SpriteRenderer>(spriteEntity);
 	spriteRenderer.texture = _graphics->CreateTexture(L"assets\\textures\\sprite.dds");
 	spriteRenderer.shader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0");
+	spriteRenderer.shader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0");
+	spriteRenderer.mesh = _graphics->CreateBillboard(512, 512);
+	spriteRenderer.mesh = _graphics->CreateBillboard(512, 512);
+	spriteRenderer.mesh = _graphics->CreateBillboard(512, 512);
 	spriteRenderer.mesh = _graphics->CreateBillboard(512, 512);
 
 	return true;
@@ -71,9 +79,9 @@ void Game::UpdateMatrices()
 	for (auto entity : view)
 	{
 		auto [transform, transformMatrix] = view.get(entity);
-		DirectX::XMMATRIX translation = XMMatrixTranslation(transform.position.x, transform.position.y, 0.0f);
-		DirectX::XMMATRIX rotation = XMMatrixRotationZ(transform.rotation);
-		DirectX::XMMATRIX scale = XMMatrixScaling(transform.scale.x, transform.scale.y, 1.0f);
+		XMMATRIX translation = XMMatrixTranslation(transform.position.x, transform.position.y, 0.0f);
+		XMMATRIX rotation = XMMatrixRotationZ(transform.rotation);
+		XMMATRIX scale = XMMatrixScaling(transform.scale.x, transform.scale.y, 1.0f);
 		transformMatrix.worldMatrix = scale * rotation * translation;
 	}
 }
