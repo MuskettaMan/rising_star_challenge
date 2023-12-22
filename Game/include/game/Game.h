@@ -6,7 +6,6 @@
 class IGraphics;
 class ITexture;
 class IShader;
-class IRenderable;
 
 class Game : public IApplication
 {

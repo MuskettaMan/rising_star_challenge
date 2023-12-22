@@ -1,13 +1,12 @@
 #include "pch.h"
-#include "engine/implementation/directx11/DirectX11Graphics.h"
+#include "engine/implementation/directx11/dx11_graphics.hpp"
 
-#include "engine/implementation/directx11/DirectX11Billboard.h"
 #include <engine/camera.hpp>
 #include <engine/ecs.hpp>
 #include <engine/transform.hpp>
 #include <engine/sprite_renderer.hpp>
 
-DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferRTV(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0)
+DX11Graphics::DX11Graphics(HWND hwndIn) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferRTV(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0)
 {
     RECT dimensions;
     GetClientRect(_hwnd, &dimensions);
@@ -92,12 +91,12 @@ DirectX11Graphics::DirectX11Graphics(HWND hwndIn) : _device(nullptr), _context(n
     ImGui_ImplDX11_Init(_device.Get(), _context.Get());
 }
 
-DirectX11Graphics::~DirectX11Graphics()
+DX11Graphics::~DX11Graphics()
 {
     ImGui_ImplDX11_Shutdown();
 }
 
-void DirectX11Graphics::BeginUpdate()
+void DX11Graphics::BeginUpdate()
 {
     ImGui_ImplDX11_NewFrame();
 
@@ -114,7 +113,7 @@ void DirectX11Graphics::BeginUpdate()
     cameraMatrix.projection = DirectX::XMMatrixOrthographicOffCenterLH(-halfWidth, halfWidth, -halfHeight, halfHeight, camera.nearPlane, camera.farPlane);
 }
 
-void DirectX11Graphics::Update()
+void DX11Graphics::Update()
 {
     if (_context && _swapChain)
     {
@@ -142,9 +141,9 @@ void DirectX11Graphics::Update()
         for (const entt::entity spriteRendererEntity : spriteRendererView)
         {
             auto [spriteRenderer, transformMatrix]{spriteRendererView.get(spriteRendererEntity)};
-            const DirectX11Mesh& mesh = _meshes[spriteRenderer.mesh.Id()];
-            const DirectX11Shader2& shader = _shaders[spriteRenderer.shader.Id()];
-            const DirectX11Texture2& texture = _textures[spriteRenderer.texture.Id()];
+            const DX11Mesh& mesh = _meshes[spriteRenderer.mesh.Id()];
+            const DX11Shader& shader = _shaders[spriteRenderer.shader.Id()];
+            const DX11Texture& texture = _textures[spriteRenderer.texture.Id()];
 
             _context->IASetInputLayout(shader._inputLayout.Get());
             _context->VSSetShader(shader._vertexShader.Get(), 0, 0);
@@ -166,7 +165,7 @@ void DirectX11Graphics::Update()
     }
 }
 
-void DirectX11Graphics::EndUpdate()
+void DX11Graphics::EndUpdate()
 {
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
@@ -176,12 +175,12 @@ void DirectX11Graphics::EndUpdate()
     }
 }
 
-bool DirectX11Graphics::IsValid()
+bool DX11Graphics::IsValid()
 {
     return _device != nullptr;
 }
 
-ResourceHandle<Texture> DirectX11Graphics::CreateTexture(const wchar_t* filepath)
+ResourceHandle<Texture> DX11Graphics::CreateTexture(const wchar_t* filepath)
 {
     ComPtr<ID3D11ShaderResourceView> srv = nullptr;
     ComPtr<ID3D11SamplerState> sampler = nullptr;
@@ -215,15 +214,15 @@ ResourceHandle<Texture> DirectX11Graphics::CreateTexture(const wchar_t* filepath
 
             texture->GetDesc(&description);
 
-            _textures.emplace_back(DirectX11Texture2{ srv, sampler, texture, description });
-            return ResourceHandle<Texture>(_textures.size() - 1);
+            _textures.emplace_back(DX11Texture{ srv, sampler, texture, description });
+            return ResourceHandle<Texture>(static_cast<uint32_t>(_textures.size() - 1));
         }
     }
 
     return ResourceHandle<Texture>();
 }
 
-ResourceHandle<Shader> DirectX11Graphics::CreateShader(const wchar_t* filepath, const char* vsentry, const char* vsshader, const char* psentry, const char* psshader)
+ResourceHandle<Shader> DX11Graphics::CreateShader(const wchar_t* filepath, const char* vsentry, const char* vsshader, const char* psentry, const char* psshader)
 {
     ComPtr<ID3D11VertexShader> vertexShader = nullptr;
     ComPtr<ID3D11PixelShader> pixelShader = nullptr;
@@ -260,7 +259,7 @@ ResourceHandle<Shader> DirectX11Graphics::CreateShader(const wchar_t* filepath, 
                 hr = _device->CreatePixelShader(psBuffer->GetBufferPointer(), psBuffer->GetBufferSize(), 0, pixelShader.GetAddressOf());
 
                 _shaders.emplace_back(vertexShader, pixelShader, inputLayout);
-                return ResourceHandle<Shader>(_shaders.size() - 1);
+                return ResourceHandle<Shader>(static_cast<uint32_t>(_shaders.size() - 1));
             }
         }
     }
@@ -269,7 +268,7 @@ ResourceHandle<Shader> DirectX11Graphics::CreateShader(const wchar_t* filepath, 
     return ResourceHandle<Shader>();
 }
 
-ResourceHandle<Mesh> DirectX11Graphics::CreateBillboard(float width, float height)
+ResourceHandle<Mesh> DX11Graphics::CreateBillboard(float width, float height)
 {
     std::shared_ptr<IRenderable> result = nullptr;
 
@@ -320,13 +319,13 @@ ResourceHandle<Mesh> DirectX11Graphics::CreateBillboard(float width, float heigh
     if (successVertexBuffer && successIndexBuffer)
     {
         _meshes.emplace_back(vertexBuffer, indexBuffer, vertexStride);
-        return ResourceHandle<Mesh>(_meshes.size() - 1);
+        return ResourceHandle<Mesh>(static_cast<uint32_t>(_meshes.size() - 1));
     }
 
     return ResourceHandle<Mesh>();
 }
 
-void DirectX11Graphics::SetScreenSize(uint32_t width, uint32_t height)
+void DX11Graphics::SetScreenSize(uint32_t width, uint32_t height)
 {
     _windowWidth = width; _windowHeight = height;
     
@@ -347,7 +346,7 @@ void DirectX11Graphics::SetScreenSize(uint32_t width, uint32_t height)
     //SetupRenderTexture();
 }
 
-void DirectX11Graphics::SetWorldMatrix(const TransformMatrix& transform)
+void DX11Graphics::SetWorldMatrix(const TransformMatrix& transform)
 {
     Camera& camera = ECS::Instance().GetCamera();
     CameraMatrix& cameraMatrix = ECS::Instance().GetCameraMatrix();
@@ -358,7 +357,7 @@ void DirectX11Graphics::SetWorldMatrix(const TransformMatrix& transform)
     _context->VSSetConstantBuffers(0, 1, _mvp.GetAddressOf());
 }
 
-bool DirectX11Graphics::CompileShader(LPCWSTR filepath, LPCSTR entry, LPCSTR shader, ID3DBlob** buffer)
+bool DX11Graphics::CompileShader(LPCWSTR filepath, LPCSTR entry, LPCSTR shader, ID3DBlob** buffer)
 {
     DWORD shaderFlags = D3DCOMPILE_ENABLE_STRICTNESS;
 
@@ -380,7 +379,7 @@ bool DirectX11Graphics::CompileShader(LPCWSTR filepath, LPCSTR entry, LPCSTR sha
     return hr == S_OK;
 }
 
-HRESULT DirectX11Graphics::SetupBackBuffer()
+HRESULT DX11Graphics::SetupBackBuffer()
 {
     HRESULT hr;
     hr = _swapChain->GetBuffer(0, IID_PPV_ARGS(_backbufferTexture.GetAddressOf()));
@@ -398,7 +397,7 @@ HRESULT DirectX11Graphics::SetupBackBuffer()
     return hr;
 }
 
-void DirectX11Graphics::SetupRenderTexture()
+void DX11Graphics::SetupRenderTexture()
 {
     DXGI_SAMPLE_DESC sampleDesc;
     ZeroMemory(&sampleDesc, sizeof(sampleDesc));

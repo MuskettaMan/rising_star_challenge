@@ -3,9 +3,8 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include "pch.h"
-#include "Engine/Implementation/DirectX11/DirectX11Graphics.h"
+#include "Engine/Implementation/directx11/dx11_graphics.hpp"
 #include "Engine/Implementation/XInput/DirectXInput.h"
-#include "Engine/IRenderable.h"
 #include "Engine/ITexture.h"
 #include "Engine/IShader.h"
 #include "Engine/IApplication.h"
@@ -70,7 +69,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	msg.message = WM_NULL;
 	msg.wParam = -1;
 	{
-		std::shared_ptr<IGraphics> graphics = std::make_shared<DirectX11Graphics>(hwnd);
+		std::shared_ptr<IGraphics> graphics = std::make_shared<DX11Graphics>(hwnd);
 		std::shared_ptr<IInput> input = std::make_shared<DirectXInput>();
 		std::unique_ptr<IApplication> application = GetApplication(graphics, input);
 		std::unique_ptr<Editor> editor = std::make_unique<Editor>(*graphics);

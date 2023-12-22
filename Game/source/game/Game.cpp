@@ -4,7 +4,6 @@
 #include "Engine/IGraphics.h"
 #include "Engine/ITexture.h"
 #include "Engine/IShader.h"
-#include "Engine/IRenderable.h"
 #include "Engine/IInput.h"
 #include <engine/ecs.hpp>
 #include <engine/camera.hpp>

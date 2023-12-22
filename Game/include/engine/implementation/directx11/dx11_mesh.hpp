@@ -2,9 +2,9 @@
 
 #include "engine/mesh.hpp"
 
-struct DirectX11Mesh : public Mesh
+struct DX11Mesh : public Mesh
 {
-	DirectX11Mesh(const ComPtr<ID3D11Buffer>& _vertexBuffer, const ComPtr<ID3D11Buffer>& _indexBuffer, unsigned int _vertexStride)
+	DX11Mesh(const ComPtr<ID3D11Buffer>& _vertexBuffer, const ComPtr<ID3D11Buffer>& _indexBuffer, unsigned int _vertexStride)
 		: _vertexBuffer(_vertexBuffer), _indexBuffer(_indexBuffer), _vertexStride(_vertexStride)
 	{
 	}

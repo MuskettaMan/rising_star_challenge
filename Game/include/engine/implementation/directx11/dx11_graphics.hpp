@@ -1,9 +1,9 @@
 #pragma once
 
 #include "engine/IGraphics.h"
-#include "engine/implementation/directx11/DirectX11Shader.h"
-#include "engine/implementation/directx11/DirectX11Texture.h"
-#include "engine/implementation/directx11/DirectX11Mesh.h"
+#include "engine/implementation/directx11/dx11_shader.hpp"
+#include "engine/implementation/directx11/dx11_texture.hpp"
+#include "engine/implementation/directx11/dx11_mesh.hpp"
 #include "engine/transform.hpp"
 
 struct ID3D11Device;
@@ -21,12 +21,12 @@ struct BillboardVertex
 	XMFLOAT2 textureCoordinate;
 };
 
-class DirectX11Graphics : public IGraphics
+class DX11Graphics : public IGraphics
 {
 public:
 
-	DirectX11Graphics(HWND hwndIn);
-	virtual ~DirectX11Graphics();
+	DX11Graphics(HWND hwndIn);
+	virtual ~DX11Graphics();
 
 	virtual void BeginUpdate();
 	virtual void Update();
@@ -75,8 +75,8 @@ private:
 	void SetupRenderTexture();
 
 	// Pairs a texture with a handle counter.
-	std::vector<DirectX11Texture2> _textures;
-	std::vector<DirectX11Mesh> _meshes;
-	std::vector<DirectX11Shader2> _shaders;
+	std::vector<DX11Texture> _textures;
+	std::vector<DX11Mesh> _meshes;
+	std::vector<DX11Shader> _shaders;
 };
 
