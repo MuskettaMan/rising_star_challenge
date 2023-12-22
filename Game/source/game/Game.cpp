@@ -83,5 +83,6 @@ void Game::UpdateMatrices()
 		XMMATRIX rotation = XMMatrixRotationZ(transform.rotation);
 		XMMATRIX scale = XMMatrixScaling(transform.scale.x, transform.scale.y, 1.0f);
 		transformMatrix.worldMatrix = scale * rotation * translation;
+		transformMatrix.worldToLocalMatrix = XMMatrixIdentity();
 	}
 }

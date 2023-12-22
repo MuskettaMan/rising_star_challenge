@@ -54,7 +54,7 @@ void EditorEnvironment::Update()
 			ImGui::DockBuilderSplitNode(hierarchyID, ImGuiDir_Left, 0.5f, &hierarchyID, &inspectorID);
 			ImGui::DockBuilderFinish(_dockRootID);
 
-			_tabs.push_back(std::make_unique<SceneTab>(sceneID, _graphics, ImGuiWindowFlags_NoScrollbar));
+			_tabs.push_back(std::make_unique<SceneTab>(sceneID, _graphics, _selectedEntity, ImGuiWindowFlags_NoScrollbar));
 			_tabs.push_back(std::make_unique<HierarchyTab>(hierarchyID, _selectedEntity));
 			_tabs.push_back(std::make_unique<InspectorTab>(inspectorID, _selectedEntity));
 

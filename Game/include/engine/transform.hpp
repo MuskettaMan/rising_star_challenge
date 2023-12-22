@@ -12,6 +12,7 @@ struct Transform
 struct TransformMatrix
 {
 	XMMATRIX worldMatrix;
+	XMMATRIX worldToLocalMatrix;
 };
 
 VISITABLE_STRUCT(Transform, position, rotation, scale);

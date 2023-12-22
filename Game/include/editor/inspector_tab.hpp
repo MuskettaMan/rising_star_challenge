@@ -10,17 +10,17 @@ struct SpriteRenderer;
 
 inline void InspectValue(const char* name, float& member)
 {
-    ImGui::DragFloat(name, &member, 0.05);
+    ImGui::DragFloat(name, &member, 0.05f);
 }
 
 inline void InspectValue(const char* name, XMFLOAT2& member)
 {
-    ImGui::DragFloat2(name, &member.x, 0.05);
+    ImGui::DragFloat2(name, &member.x, 0.05f);
 }
 
 inline void InspectValue(const char* name, XMFLOAT3& member)
 {
-    ImGui::DragFloat3(name, &member.x, 0.05);
+    ImGui::DragFloat3(name, &member.x, 0.05f);
 }
 
 template <typename T>

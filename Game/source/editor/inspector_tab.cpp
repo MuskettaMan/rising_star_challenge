@@ -11,7 +11,10 @@
 const std::unordered_map<size_t, std::string> typeToIconMap = {
 	{ typeid(Transform).hash_code(), std::string(ICON_FA_UP_DOWN_LEFT_RIGHT) },
 	{ typeid(Camera).hash_code(), std::string(ICON_FA_VIDEO) },
+	{ typeid(SpriteRenderer).hash_code(), std::string(ICON_FA_IMAGE) },
 };
+
+const std::string defaultIcon{ ICON_FA_PUZZLE_PIECE };
 
 InspectorTab::InspectorTab(ImGuiID dockID, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags) : BaseTab("Inspector", dockID, windowFlags), _selectedEntity(selectedEntity)
 {
@@ -40,7 +43,7 @@ const std::string& InspectorTab::GetIcon(size_t typeID) const
 {
 	auto it = typeToIconMap.find(typeID);
 	if (it == typeToIconMap.end())
-		return "";
+		return defaultIcon;
 	
 	return it->second;
 }
