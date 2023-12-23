@@ -118,7 +118,7 @@ void DX11Graphics::Update()
     if (_context && _swapChain)
     {
 
-        float clearColour[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        float clearColour[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
         _context->ClearRenderTargetView(_backbufferRTV.Get(), clearColour);
         
         if(ENABLE_EDITOR)

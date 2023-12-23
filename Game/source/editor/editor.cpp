@@ -50,6 +50,7 @@ Editor::Editor(IGraphics& graphics) : _graphics(graphics)
         ImGui::GetStyle().Colors[ImGuiCol_TitleBgActive] = black;
         ImGui::GetStyle().Colors[ImGuiCol_TitleBg] = black;
         ImGui::GetStyle().Colors[ImGuiCol_WindowBg] = black;
+        ImGui::GetStyle().Colors[ImGuiCol_ChildBg] = black;
 
         ImGui::GetStyle().Colors[ImGuiCol_Button] = middleGrey;
         ImGui::GetStyle().Colors[ImGuiCol_ButtonHovered] = darkGrey;

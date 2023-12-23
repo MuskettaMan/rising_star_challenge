@@ -6,7 +6,7 @@
 #include "engine/transform.hpp"
 #include <IconsFontAwesome6.h>
 
-SceneTab::SceneTab(ImGuiID dockID, IGraphics& graphics, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags) : BaseTab("Scene", dockID, windowFlags), _graphics(graphics), _selectedEntity(selectedEntity)
+SceneTab::SceneTab(ImGuiID dockID, IGraphics& graphics, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags) : BaseTab("Scene", dockID, windowFlags, ImVec2{0.0f, 0.0f}), _graphics(graphics), _selectedEntity(selectedEntity)
 {
 }
 
@@ -14,13 +14,19 @@ void SceneTab::DrawContents()
 {
 	ImGuiIO io{ ImGui::GetIO() };
 	ImVec2 displaySize{ io.DisplaySize };
-	ImVec2 windowSize{ ImGui::GetWindowSize() };
+	ImVec2 windowSize{ ImGui::GetContentRegionAvail() };
 
 	bool windowFocused = ImGui::IsWindowFocused();
 
 	ImVec2 size{ 108, 34 };
+	ImVec2 originalPos{ ImGui::GetCursorScreenPos() };
 	ImVec2 pos{ ImGui::GetCursorScreenPos() };
+	pos.x += 5.0f;
+	pos.y += 5.0f;
+	
 	ImGui::SetNextWindowPos(pos);
+
+	ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 5.0f);
 	ImGui::BeginChild("Handles", size, true, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize);
 	{
 		const ImVec2 buttonSize{ 18, 18 };
@@ -69,6 +75,7 @@ void SceneTab::DrawContents()
 		}
 	}
 	ImGui::EndChild();
+	ImGui::PopStyleVar();
 
 	float aspectRatioDisplay{ displaySize.x / displaySize.y };
 	float aspectRatioWindow{ windowSize.x / windowSize.y };
@@ -81,22 +88,23 @@ void SceneTab::DrawContents()
 	{
 		newSize.x = windowSize.y * aspectRatioDisplay;
 		dummySpace.x = (windowSize.x - newSize.x) / 2.0f;
-		ImGui::Dummy(dummySpace);
-		ImGui::SameLine();
 	}
 	else
 	{
 		newSize.y = windowSize.x / aspectRatioDisplay;
 		dummySpace.y = (windowSize.y - newSize.y) / 2.0f;
-		ImGui::Dummy(dummySpace);
 	}
 
 
 	ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
 	ImVec2 cursorScreenPos{ ImGui::GetCursorScreenPos() };
 	ImGuizmo::SetRect(cursorScreenPos.x, cursorScreenPos.y, newSize.x, newSize.y);
+	
+	ImVec2 scenePos{originalPos.x + dummySpace.x, originalPos.y + dummySpace.y};
+	ImGui::GetWindowDrawList()->AddImage(_graphics.GetRenderTextureSRV(), scenePos,
+										 ImVec2{ scenePos.x + newSize.x, scenePos.y + newSize.y },
+										 ImVec2(0, 0), ImVec2(1, 1));
 
-	ImGui::Image(_graphics.GetRenderTextureSRV(), newSize);
 	if (_selectedEntity != entt::null)
 		DrawHandle(_selectedEntity);
 }
