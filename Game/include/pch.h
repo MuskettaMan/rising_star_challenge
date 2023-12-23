@@ -30,6 +30,7 @@ using namespace DirectX;
 #include <unordered_map>
 #include <numeric>
 #include <limits>
+#include <cassert>
 
 // ImGui
 #include "imgui.h"

@@ -12,6 +12,7 @@ struct Transform
 struct TransformMatrix
 {
 	XMMATRIX worldMatrix;
+	XMMATRIX localMatrix;
 	XMMATRIX worldToLocalMatrix;
 };
 

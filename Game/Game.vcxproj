@@ -112,6 +112,7 @@
     <ClCompile Include="source\editor\scene_tab.cpp" />
     <ClCompile Include="source\engine\ecs.cpp" />
     <ClCompile Include="source\engine\gameobject.cpp" />
+    <ClCompile Include="source\engine\hierarchy_element.cpp" />
     <ClCompile Include="source\engine\IApplication.cpp" />
     <ClCompile Include="source\engine\IGraphics.cpp" />
     <ClCompile Include="source\engine\IInput.cpp" />
@@ -144,6 +145,7 @@
     <ClInclude Include="include\engine\camera.hpp" />
     <ClInclude Include="include\engine\ecs.hpp" />
     <ClInclude Include="include\engine\gameobject.hpp" />
+    <ClInclude Include="include\engine\hierarchy_element.hpp" />
     <ClInclude Include="include\engine\IApplication.h" />
     <ClInclude Include="include\engine\IGraphics.h" />
     <ClInclude Include="include\engine\IInput.h" />

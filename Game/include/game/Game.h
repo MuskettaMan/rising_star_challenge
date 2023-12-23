@@ -1,11 +1,13 @@
 
 #pragma once
 
-#include "Engine/IApplication.h"
+#include "engine/IApplication.h"
 
 class IGraphics;
 class ITexture;
 class IShader;
+struct TransformMatrix;
+struct HierarchyElement;
 
 class Game : public IApplication
 {
@@ -20,7 +22,9 @@ public:
 	virtual void Cleanup();
 
 private:
-	void UpdateMatrices();
+	void BuildMatrices();
+	void BuildChildMatrices(const TransformMatrix& parentMatrix, const HierarchyElement& parent);
+	entt::entity _root;
 
 };
 

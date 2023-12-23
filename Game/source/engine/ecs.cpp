@@ -2,6 +2,7 @@
 #include "engine/ecs.hpp"
 #include <engine/gameobject.hpp>
 #include "engine/transform.hpp"
+#include "engine/hierarchy_element.hpp"
 #include <engine/camera.hpp>
 
 ECS& ECS::Instance()
@@ -29,7 +30,7 @@ entt::entity ECS::CreateGameObject(const std::string& name)
 	transform.scale = XMFLOAT2{ 1.0f, 1.0f };
 
 	auto& transformMatrix = _registry.emplace<TransformMatrix>(entity);
-	transformMatrix.worldMatrix = XMMatrixIdentity();
+	transformMatrix.worldMatrix = XMMatrixIdentity();;
 
 	return entity;
 }

@@ -2,6 +2,8 @@
 
 #include "editor/base_tab.hpp"
 
+struct HierarchyElement;
+
 class HierarchyTab : public BaseTab
 {
 public:
@@ -13,4 +15,6 @@ protected:
 private:
 	entt::entity& _selectedEntity;
 	
+	void DrawRecursive(const HierarchyElement& element, int& openElementCount);
+
 };
