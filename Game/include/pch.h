@@ -32,6 +32,9 @@ using namespace DirectX;
 #include <limits>
 #include <cassert>
 
+// Box 2D
+#include "box2d.h"
+
 // ImGui
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -50,6 +53,5 @@ constexpr bool ENABLE_EDITOR = true;
 
 // ECS
 //#include "engine/ecs.hpp"
-
 
 #include "engine/resource_handle.hpp"

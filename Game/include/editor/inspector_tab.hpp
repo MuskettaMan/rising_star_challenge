@@ -13,7 +13,24 @@ inline void InspectValue(const char* name, float& member)
     ImGui::DragFloat(name, &member, 0.05f);
 }
 
+inline void InspectValue(const char* name, bool& member)
+{
+    ImGui::Checkbox(name, &member);
+}
+
+inline void InspectValue(const char* name, b2BodyType& member)
+{
+    int value{ static_cast<int>(member) };
+    ImGui::Combo(name, &value, "Static body\0Kinematic body\0Dynamic body\0");
+    member = static_cast<b2BodyType>(value);
+}
+
 inline void InspectValue(const char* name, XMFLOAT2& member)
+{
+    ImGui::DragFloat2(name, &member.x, 0.05f);
+}
+
+inline void InspectValue(const char* name, b2Vec2& member)
 {
     ImGui::DragFloat2(name, &member.x, 0.05f);
 }

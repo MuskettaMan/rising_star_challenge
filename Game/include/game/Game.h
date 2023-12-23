@@ -25,6 +25,6 @@ private:
 	void BuildMatrices();
 	void BuildChildMatrices(const TransformMatrix& parentMatrix, const HierarchyElement& parent);
 	entt::entity _root;
-
+	b2World _physicsWorld;
 };
 

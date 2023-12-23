@@ -48,6 +48,7 @@
     <IntDir>$(SolutionDir)intermediate\$(Platform)\$(Configuration)\</IntDir>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
+    <LibraryPath>$(ProjectDir)third_party\box2d\lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>$(IncludePath);$(ProjectDir);</IncludePath>
@@ -55,6 +56,7 @@
     <IntDir>$(SolutionDir)intermediate\$(Platform)\$(Configuration)\</IntDir>
     <ExternalIncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</ExternalIncludePath>
     <SourcePath>$(SourcePath)</SourcePath>
+    <LibraryPath>$(ProjectDir)third_party\box2d\lib\$(Configuration)\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -62,7 +64,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>include;third_party\imgui\;$(ProjectDir)third_party\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;third_party\imgui\;$(ProjectDir)third_party\;third_party\box2d\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -75,7 +77,7 @@
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;Xinput.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;Xinput.lib;box2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -86,7 +88,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>include;third_party\imgui\;$(ProjectDir)third_party\</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;third_party\imgui\;$(ProjectDir)third_party\;third_party\box2d\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -99,7 +101,7 @@
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;Xinput.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;Xinput.lib;box2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

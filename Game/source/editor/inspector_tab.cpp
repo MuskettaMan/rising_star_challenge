@@ -36,6 +36,7 @@ void InspectorTab::DrawContents()
 		TryInspect<Transform>(_selectedEntity);
 		TryInspect<Camera>(_selectedEntity);
 		TryInspect<SpriteRenderer>(_selectedEntity);
+		TryInspect<b2BodyDef>(_selectedEntity);
 	}
 }
 
