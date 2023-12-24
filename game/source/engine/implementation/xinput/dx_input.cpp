@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "engine/implementation/xinput/DirectXInput.h"
+#include "engine/implementation/xinput/dx_input.hpp"
 
 DirectXInput::DirectXInput() : IInput(), _state()
 {

@@ -13,7 +13,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{A5827AB4-4626-47D8-82F2-598DFC535976}</ProjectGuid>
-    <RootNamespace>Star</RootNamespace>
+    <RootNamespace>star</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -122,11 +122,10 @@
     <ClCompile Include="source\engine\implementation\directx11\dx11_mesh.cpp" />
     <ClCompile Include="source\engine\implementation\directx11\dx11_texture.cpp" />
     <ClCompile Include="source\engine\implementation\directx11\dx11_shader.cpp" />
-    <ClCompile Include="source\engine\implementation\xinput\DirectXInput.cpp" />
-    <ClCompile Include="source\engine\ITexture.cpp" />
+    <ClCompile Include="source\engine\implementation\xinput\dx_input.cpp" />
     <ClCompile Include="source\engine\resource_handle.cpp" />
-    <ClCompile Include="source\entry_points\WindowsMain.cpp" />
-    <ClCompile Include="source\game\Game.cpp" />
+    <ClCompile Include="source\entry_points\windows_main.cpp" />
+    <ClCompile Include="source\game\game.cpp" />
     <ClCompile Include="third_party\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="third_party\imgui\backends\imgui_impl_win32.cpp" />
     <ClCompile Include="third_party\imgui\imgui.cpp" />
@@ -155,16 +154,14 @@
     <ClInclude Include="include\engine\implementation\directx11\dx11_mesh.hpp" />
     <ClInclude Include="include\engine\implementation\directx11\dx11_texture.hpp" />
     <ClInclude Include="include\engine\implementation\directx11\dx11_shader.hpp" />
-    <ClInclude Include="include\engine\implementation\xinput\DirectXInput.h" />
-    <ClInclude Include="include\engine\IShader.h" />
-    <ClInclude Include="include\engine\ITexture.h" />
+    <ClInclude Include="include\engine\implementation\xinput\dx_input.hpp" />
     <ClInclude Include="include\engine\mesh.hpp" />
     <ClInclude Include="include\engine\resource_handle.hpp" />
     <ClInclude Include="include\engine\shader.hpp" />
     <ClInclude Include="include\engine\sprite_renderer.hpp" />
     <ClInclude Include="include\engine\texture.hpp" />
     <ClInclude Include="include\engine\transform.hpp" />
-    <ClInclude Include="include\game\Game.h" />
+    <ClInclude Include="include\game\game.hpp" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="third_party\entt\entt.hpp" />
     <ClInclude Include="third_party\entt\fwd.hpp" />
@@ -176,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\packages.config" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -97,14 +97,13 @@ void SceneTab::DrawContents()
 
 
 	ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
-	ImVec2 cursorScreenPos{ ImGui::GetCursorScreenPos() };
-	ImGuizmo::SetRect(cursorScreenPos.x, cursorScreenPos.y, newSize.x, newSize.y);
 	
 	ImVec2 scenePos{originalPos.x + dummySpace.x, originalPos.y + dummySpace.y};
 	ImGui::GetWindowDrawList()->AddImage(_graphics.GetRenderTextureSRV(), scenePos,
 										 ImVec2{ scenePos.x + newSize.x, scenePos.y + newSize.y },
 										 ImVec2(0, 0), ImVec2(1, 1));
 
+	ImGuizmo::SetRect(scenePos.x, scenePos.y, newSize.x, newSize.y);
 	if (_selectedEntity != entt::null)
 		DrawHandle(_selectedEntity);
 }

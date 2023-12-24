@@ -1,6 +1,5 @@
 #pragma once
 
-#include "engine/ITexture.h"
 #include "engine/texture.hpp"
 #include <d3d11.h>
 

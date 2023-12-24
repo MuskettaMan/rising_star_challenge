@@ -1,10 +1,8 @@
 #include "pch.h"
-#include "game/Game.h"
+#include "game/game.hpp"
 
-#include "Engine/IGraphics.h"
-#include "Engine/ITexture.h"
-#include "Engine/IShader.h"
-#include "Engine/IInput.h"
+#include "engine/IGraphics.h"
+#include "engine/IInput.h"
 #include <engine/ecs.hpp>
 #include <engine/camera.hpp>
 #include <engine/transform.hpp>

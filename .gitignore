@@ -9,7 +9,6 @@
 
 # Precompiled Headers
 *.gch
-*.pch
 
 # Compiled Dynamic libraries
 *.so
@@ -24,7 +23,6 @@
 *.lai
 *.la
 *.a
-*.lib
 
 # Executables
 *.exe
@@ -34,6 +32,4 @@
 .vs
 x64/
 packages/
-Release/
-Debug/
 *.vcxproj.user

@@ -3,11 +3,9 @@
 #define WIN32_LEAN_AND_MEAN
 
 #include "pch.h"
-#include "Engine/Implementation/directx11/dx11_graphics.hpp"
-#include "Engine/Implementation/XInput/DirectXInput.h"
-#include "Engine/ITexture.h"
-#include "Engine/IShader.h"
-#include "Engine/IApplication.h"
+#include "engine/Implementation/directx11/dx11_graphics.hpp"
+#include "engine/Implementation/XInput/dx_input.hpp"
+#include "engine/IApplication.h"
 #include <editor/editor.hpp>
 
 const char WindowClassName[] = "Star";
