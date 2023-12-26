@@ -4,9 +4,10 @@
 
 struct BoxCollider
 {
+	b2BodyType type{ b2_staticBody };
 	float width;
 	float height;
 
 };
 
-VISITABLE_STRUCT(BoxCollider, width, height);
+VISITABLE_STRUCT(BoxCollider, type, width, height);
