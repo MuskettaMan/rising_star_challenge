@@ -10,6 +10,10 @@
 #include "entt/core/hashed_string.hpp"
 #include <engine/hierarchy_element.hpp>
 
+#include "engine/box_collider.hpp"
+#include "engine/physics_world.hpp"
+#include <engine/physics_debug_drawer.hpp>
+
 using namespace entt::literals;
 
 std::unique_ptr<IApplication> GetApplication(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input)
@@ -17,7 +21,7 @@ std::unique_ptr<IApplication> GetApplication(std::shared_ptr<IGraphics> graphics
 	return std::make_unique<Game>(graphics, input);
 }
 
-Game::Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input) : IApplication(graphics, input), _physicsWorld{ b2Vec2{0.0f, -10.0f} }
+Game::Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input) : IApplication(graphics, input), _physicsWorld(std::make_unique<PhysicsWorld>(std::make_unique<PhysicsDebugDrawer>(*_graphics)))
 {
 }
 
@@ -32,13 +36,6 @@ bool Game::IsValid()
 
 bool Game::Load()
 {
-	b2BodyDef bodyDef;
-	bodyDef.position.Set(0.0f, -10.0f);
-	b2Body* body = _physicsWorld.CreateBody(&bodyDef);
-	b2PolygonShape shape;
-	shape.SetAsBox(50.0f, 10.0f);
-	body->CreateFixture(&shape, 0.0f);
-
 	_root = ECS::Instance().CreateEntity();
 	ECS::Instance().Registry().emplace<HierarchyElement>(_root);
 	ECS::Instance().Registry().emplace<HierarchyRoot>(_root);
@@ -57,10 +54,10 @@ bool Game::Load()
 
 	entt::entity spriteEntity = ECS::Instance().CreateGameObject("Sprite renderer");
 	ECS::Instance().Registry().emplace<HierarchyElement>(spriteEntity);
-	ECS::Instance().Registry().emplace<b2BodyDef>(spriteEntity);
+	ECS::Instance().Registry().emplace<BoxCollider>(spriteEntity, 10.0f, 10.0f);
 	auto& spriteRenderer = ECS::Instance().Registry().emplace<SpriteRenderer>(spriteEntity);
 	spriteRenderer.texture = _graphics->CreateTexture(L"assets\\textures\\sprite.dds");
-	spriteRenderer.shader = _graphics->CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0");
+	spriteRenderer.shader = _graphics->CreateShader(L"assets\\shaders\\Unlit.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0");
 	spriteRenderer.mesh = _graphics->CreateBillboard(512, 512);
 
 	entt::entity spriteEntity2 = ECS::Instance().CreateGameObject("Sprite renderer");
@@ -75,10 +72,7 @@ bool Game::Load()
 
 void Game::Update()
 {
-	constexpr int32_t VELOCITY_ITERATIONS = 6;
-	constexpr int32_t POSITION_ITERATIONS = 2;
-	_physicsWorld.Step(1.0f / 60.0f, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
-
+	_physicsWorld->Update();
 	BuildMatrices();
 }
 

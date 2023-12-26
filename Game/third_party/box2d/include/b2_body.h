@@ -126,8 +126,6 @@ struct B2_API b2BodyDef
 	float gravityScale;
 };
 
-VISITABLE_STRUCT(b2BodyDef, type, position, angle, linearVelocity, angularVelocity, linearDamping, angularDamping, allowSleep, awake, fixedRotation, bullet, enabled, gravityScale);
-
 /// A rigid body. These are created via b2World::CreateBody.
 class B2_API b2Body
 {

@@ -88,6 +88,8 @@ DX11Graphics::DX11Graphics(HWND hwndIn) : _device(nullptr), _context(nullptr), _
 
     SetupRenderTexture();
 
+    _debugShader = CreateShader(L"assets\\shaders\\UnlitColor.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0").Id();
+
     ImGui_ImplDX11_Init(_device.Get(), _context.Get());
 }
 
@@ -161,8 +163,48 @@ void DX11Graphics::Update()
             _context->DrawIndexed(mesh._vertexCount, 0, 0);
         }
 
+        if (!_lines.empty())
+        {
+            // Set debug shader as active.
+            const DX11Shader& debugShader = _shaders[_debugShader.Id()];
+            _context->IASetInputLayout(debugShader._inputLayout.Get());
+            _context->VSSetShader(debugShader._vertexShader.Get(), 0, 0);
+            _context->PSSetShader(debugShader._pixelShader.Get(), 0, 0);
+
+            _context->OMSetBlendState(_blendState.Get(), nullptr, ~0U);
+
+            // Set default mvp.
+            TransformMatrix matrix{};
+            matrix.worldMatrix = XMMatrixIdentity();
+            SetWorldMatrix(matrix);
+
+            // Create buffer for line vertices.
+            // TODO: Reuse buffer between frames.
+            D3D11_BUFFER_DESC lineBufferDesc;
+            ZeroMemory(&lineBufferDesc, sizeof(lineBufferDesc));
+            lineBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+            lineBufferDesc.ByteWidth = sizeof(BillboardVertex) * _lines.size();
+            lineBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+            D3D11_SUBRESOURCE_DATA initData;
+            ZeroMemory(&initData, sizeof(initData));
+            initData.pSysMem = _lines.data();
+            ComPtr<ID3D11Buffer> lineBuffer;
+            _device->CreateBuffer(&lineBufferDesc, &initData, lineBuffer.GetAddressOf());
+
+            // Draw line vertices as a line list primitive.
+            uint32_t stride = sizeof(BillboardVertex);
+            uint32_t offset = 0;
+            _context->IASetVertexBuffers(0, 1, lineBuffer.GetAddressOf(), &stride, &offset);
+            _context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+            _context->Draw(_lines.size(), 0);
+        }
+
+
         _context->OMSetRenderTargets(1, _backbufferRTV.GetAddressOf(), nullptr);
     }
+
+    _lines.clear();
 }
 
 void DX11Graphics::EndUpdate()
@@ -241,7 +283,8 @@ ResourceHandle<Shader> DX11Graphics::CreateShader(const wchar_t* filepath, const
                 D3D11_INPUT_ELEMENT_DESC layout[] =
                 {
                     {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-                    {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0}
+                    {"TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                    {"COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 20, D3D11_INPUT_PER_VERTEX_DATA, 0}
                 };
 
                 unsigned int totalLayoutElements = ARRAYSIZE(layout);
@@ -277,10 +320,10 @@ ResourceHandle<Mesh> DX11Graphics::CreateBillboard(float width, float height)
 
     BillboardVertex vertex_data_array[] =
     {
-        XMFLOAT3{ -halfWidth,  -halfHeight, 0.0f }, XMFLOAT2{ 0.0f, 1.0f },
-        XMFLOAT3{ halfWidth, -halfHeight, 0.0f }, XMFLOAT2{ 1.0f, 1.0f },
-        XMFLOAT3{ -halfWidth,  halfHeight, 0.0f }, XMFLOAT2{ 0.0f, 0.0f },
-        XMFLOAT3{ halfWidth, halfHeight, 0.0f }, XMFLOAT2{ 1.0f, 0.0f },
+        XMFLOAT3{ -halfWidth,  -halfHeight, 0.0f }, XMFLOAT2{ 0.0f, 1.0f }, XMFLOAT3{ 1.0f, 1.0f, 1.0f },
+        XMFLOAT3{ halfWidth, -halfHeight, 0.0f }, XMFLOAT2{ 1.0f, 1.0f }, XMFLOAT3{ 1.0f, 1.0f, 1.0f },
+        XMFLOAT3{ -halfWidth,  halfHeight, 0.0f }, XMFLOAT2{ 0.0f, 0.0f }, XMFLOAT3{ 1.0f, 1.0f, 1.0f },
+        XMFLOAT3{ halfWidth, halfHeight, 0.0f }, XMFLOAT2{ 1.0f, 0.0f }, XMFLOAT3{ 1.0f, 1.0f, 1.0f },
     };
 
     uint32_t index_data_array[] = {
@@ -323,6 +366,12 @@ ResourceHandle<Mesh> DX11Graphics::CreateBillboard(float width, float height)
     }
 
     return ResourceHandle<Mesh>();
+}
+
+void DX11Graphics::DrawLine(XMFLOAT2 from, XMFLOAT2 to, XMFLOAT3 color)
+{
+    _lines.emplace_back(BillboardVertex{ XMFLOAT3{from.x, from.y, 0.0f}, XMFLOAT2{ 0.0f, 0.0f }, color });
+    _lines.emplace_back(BillboardVertex{ XMFLOAT3{to.x, to.y, 0.0f}, XMFLOAT2{ 0.0f, 0.0f }, color });
 }
 
 void DX11Graphics::SetScreenSize(uint32_t width, uint32_t height)

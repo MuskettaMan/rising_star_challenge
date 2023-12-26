@@ -19,6 +19,7 @@ struct BillboardVertex
 {
 	XMFLOAT3 position;
 	XMFLOAT2 textureCoordinate;
+	XMFLOAT3 color;
 };
 
 class DX11Graphics : public IGraphics
@@ -36,6 +37,8 @@ public:
 	ResourceHandle<Texture> CreateTexture(const wchar_t* filepath) override;
 	ResourceHandle<Shader> CreateShader(const wchar_t* filepath, const char* vsentry, const char* vsshader, const char* psentry, const char* psshader) override;
 	ResourceHandle<Mesh> CreateBillboard(float width, float height) override;
+
+	void DrawLine(XMFLOAT2 from, XMFLOAT2 to, XMFLOAT3 color) override;
 
 	virtual void* GetRenderTextureSRV() const { return _renderTextureSRV.Get(); };
 	virtual void SetScreenSize(uint32_t width, uint32_t height);
@@ -74,9 +77,12 @@ private:
 	HRESULT SetupBackBuffer();
 	void SetupRenderTexture();
 
+	ResourceHandle<Shader> _debugShader;
+
 	// Pairs a texture with a handle counter.
 	std::vector<DX11Texture> _textures;
 	std::vector<DX11Mesh> _meshes;
 	std::vector<DX11Shader> _shaders;
+	std::vector<BillboardVertex> _lines;
 };
 

@@ -8,6 +8,8 @@
 #include "IconsFontAwesome6.h"
 #include <typeinfo>
 
+#include "engine/box_collider.hpp"
+
 const std::unordered_map<size_t, std::string> typeToIconMap = {
 	{ typeid(Transform).hash_code(), std::string(ICON_FA_UP_DOWN_LEFT_RIGHT) },
 	{ typeid(Camera).hash_code(), std::string(ICON_FA_VIDEO) },
@@ -36,7 +38,7 @@ void InspectorTab::DrawContents()
 		TryInspect<Transform>(_selectedEntity);
 		TryInspect<Camera>(_selectedEntity);
 		TryInspect<SpriteRenderer>(_selectedEntity);
-		TryInspect<b2BodyDef>(_selectedEntity);
+		TryInspect<BoxCollider>(_selectedEntity);
 	}
 }
 

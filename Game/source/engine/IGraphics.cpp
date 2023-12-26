@@ -2,10 +2,6 @@
 #include "engine/IGraphics.h"
 
 
-IGraphics::IGraphics() 
-{
-}
+IGraphics::IGraphics() = default;
 
-IGraphics::~IGraphics()
-{
-}
+IGraphics::~IGraphics() = default;

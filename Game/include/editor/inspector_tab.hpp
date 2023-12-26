@@ -8,53 +8,58 @@ struct Transform;
 struct Camera;
 struct SpriteRenderer;
 
-inline void InspectValue(const char* name, float& member)
+inline bool InspectValue(const char* name, float& member)
 {
-    ImGui::DragFloat(name, &member, 0.05f);
+    return ImGui::DragFloat(name, &member, 0.05f);
 }
 
-inline void InspectValue(const char* name, bool& member)
+inline bool InspectValue(const char* name, bool& member)
 {
-    ImGui::Checkbox(name, &member);
+    return ImGui::Checkbox(name, &member);
 }
 
-inline void InspectValue(const char* name, b2BodyType& member)
+inline bool InspectValue(const char* name, b2BodyType& member)
 {
     int value{ static_cast<int>(member) };
-    ImGui::Combo(name, &value, "Static body\0Kinematic body\0Dynamic body\0");
+    bool dirty = ImGui::Combo(name, &value, "Static body\0Kinematic body\0Dynamic body\0");
     member = static_cast<b2BodyType>(value);
+
+    return dirty;
 }
 
-inline void InspectValue(const char* name, XMFLOAT2& member)
+inline bool InspectValue(const char* name, XMFLOAT2& member)
 {
-    ImGui::DragFloat2(name, &member.x, 0.05f);
+    return ImGui::DragFloat2(name, &member.x, 0.05f);
 }
 
-inline void InspectValue(const char* name, b2Vec2& member)
+inline bool InspectValue(const char* name, b2Vec2& member)
 {
-    ImGui::DragFloat2(name, &member.x, 0.05f);
+    return ImGui::DragFloat2(name, &member.x, 0.05f);
 }
 
-inline void InspectValue(const char* name, XMFLOAT3& member)
+inline bool InspectValue(const char* name, XMFLOAT3& member)
 {
-    ImGui::DragFloat3(name, &member.x, 0.05f);
+    return ImGui::DragFloat3(name, &member.x, 0.05f);
 }
 
 template <typename T>
-inline void InspectValue(const char* name, ResourceHandle<T>& member)
+inline bool InspectValue(const char* name, ResourceHandle<T>& member)
 {
     int32_t id{ static_cast<int32_t>(member.Id())};
-    ImGui::DragInt(name, &id, 1);
+    return ImGui::DragInt(name, &id, 1);
 }
 
 struct DrawObject
-{
+{   
+    bool dirty = false;
+
     template <typename T>
     void operator()(const char* name, T& member)
     {
-        InspectValue(name, member);
+        bool result = InspectValue(name, member);
+        if (result)
+            dirty = true;
     }
-
 };
 
 class InspectorTab : public BaseTab
@@ -76,16 +81,25 @@ private:
     {
         T* component = ECS::Instance().Registry().try_get<T>(_selectedEntity);
         if (component)
-            InspectObject(*component);
+        {
+            T copy{ *component };
+            if(InspectObject(copy))
+                ECS::Instance().Registry().replace<T>(entity, copy);
+        }
     }
 
     template <typename T>
-    void InspectObject(T& obj)
+    bool InspectObject(T& obj)
     {
         std::string typeName = visit_struct::get_name<T>();
         if (ImGui::CollapsingHeader((GetIcon(typeid(T).hash_code()) + "   " + typeName).c_str(), nullptr, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_SpanFullWidth))
         {
-            visit_struct::for_each(obj, DrawObject{});
+            DrawObject drawObj{};
+            visit_struct::for_each(obj, drawObj);
+
+            return drawObj.dirty;
         }
+
+        return false;
     }
 };

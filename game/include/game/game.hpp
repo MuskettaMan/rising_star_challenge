@@ -3,6 +3,7 @@
 
 #include "engine/IApplication.h"
 
+class PhysicsWorld;
 class IGraphics;
 class ITexture;
 class IShader;
@@ -25,6 +26,6 @@ private:
 	void BuildMatrices();
 	void BuildChildMatrices(const TransformMatrix& parentMatrix, const HierarchyElement& parent);
 	entt::entity _root;
-	b2World _physicsWorld;
+	std::unique_ptr<PhysicsWorld> _physicsWorld;
 };
 

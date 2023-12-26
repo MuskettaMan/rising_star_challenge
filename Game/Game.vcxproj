@@ -79,6 +79,10 @@
       </EntryPointSymbol>
       <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;Xinput.lib;box2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <FxCompile>
+      <ShaderType>Effect</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -103,6 +107,10 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>d3d11.lib;d3dcompiler.lib;Xinput.lib;box2d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <FxCompile>
+      <ShaderType>Effect</ShaderType>
+      <ShaderModel>5.0</ShaderModel>
+    </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\editor\base_tab.cpp" />
@@ -123,6 +131,8 @@
     <ClCompile Include="source\engine\implementation\directx11\dx11_texture.cpp" />
     <ClCompile Include="source\engine\implementation\directx11\dx11_shader.cpp" />
     <ClCompile Include="source\engine\implementation\xinput\dx_input.cpp" />
+    <ClCompile Include="source\engine\physics_debug_drawer.cpp" />
+    <ClCompile Include="source\engine\physics_world.cpp" />
     <ClCompile Include="source\engine\resource_handle.cpp" />
     <ClCompile Include="source\entry_points\windows_main.cpp" />
     <ClCompile Include="source\game\game.cpp" />
@@ -143,6 +153,7 @@
     <ClInclude Include="include\editor\hierarchy_tab.hpp" />
     <ClInclude Include="include\editor\inspector_tab.hpp" />
     <ClInclude Include="include\editor\scene_tab.hpp" />
+    <ClInclude Include="include\engine\box_collider.hpp" />
     <ClInclude Include="include\engine\camera.hpp" />
     <ClInclude Include="include\engine\ecs.hpp" />
     <ClInclude Include="include\engine\gameobject.hpp" />
@@ -156,6 +167,8 @@
     <ClInclude Include="include\engine\implementation\directx11\dx11_shader.hpp" />
     <ClInclude Include="include\engine\implementation\xinput\dx_input.hpp" />
     <ClInclude Include="include\engine\mesh.hpp" />
+    <ClInclude Include="include\engine\physics_debug_drawer.hpp" />
+    <ClInclude Include="include\engine\physics_world.hpp" />
     <ClInclude Include="include\engine\resource_handle.hpp" />
     <ClInclude Include="include\engine\shader.hpp" />
     <ClInclude Include="include\engine\sprite_renderer.hpp" />
@@ -174,6 +187,22 @@
   <ItemGroup>
     <None Include="..\packages.config" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="assets\shaders\Unlit.fx">
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="assets\shaders\UnlitColor.fx">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Effect</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Effect</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">5.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
