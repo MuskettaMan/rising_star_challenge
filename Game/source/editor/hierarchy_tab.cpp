@@ -10,14 +10,14 @@ constexpr ImGuiTreeNodeFlags BASE_NODE_FLAGS =
 	ImGuiTreeNodeFlags_SpanFullWidth | 
 	ImGuiTreeNodeFlags_FramePadding;
 
-HierarchyTab::HierarchyTab(ImGuiID dockID, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags) : BaseTab("Hierarchy", dockID, windowFlags), _selectedEntity(selectedEntity)
+HierarchyTab::HierarchyTab(ImGuiID dockID, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags, ECS& ecs) : BaseTab("Hierarchy", dockID, windowFlags), _selectedEntity(selectedEntity), _ecs(ecs)
 {
 }
 
 void HierarchyTab::DrawContents()
 {
 	int openElementCount{ 0 };
-	auto rootView = ECS::Instance().Registry().view<HierarchyElement, HierarchyRoot>();
+	auto rootView = _ecs.Registry().view<HierarchyElement, HierarchyRoot>();
 	assert(rootView.begin() != rootView.end() && "No root element found in registry!");
 	auto [rootElement] {rootView.get(*rootView.begin()) };
 
@@ -56,8 +56,8 @@ void HierarchyTab::DrawRecursive(const HierarchyElement& element, int& openEleme
     {
         const entt::entity childEntity = element.children[i];
 
-        const HierarchyElement& child = ECS::Instance().Registry().get<const HierarchyElement>(childEntity);
-        const GameObject& gameObject = ECS::Instance().Registry().get<const GameObject>(childEntity);
+        const HierarchyElement& child = _ecs.Registry().get<const HierarchyElement>(childEntity);
+        const GameObject& gameObject = _ecs.Registry().get<const GameObject>(childEntity);
         ImGuiTreeNodeFlags nodeFlags = BASE_NODE_FLAGS;
 
         if (_selectedEntity == childEntity)

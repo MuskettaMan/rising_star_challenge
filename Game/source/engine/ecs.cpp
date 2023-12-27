@@ -5,7 +5,7 @@
 #include "engine/hierarchy_element.hpp"
 #include <engine/camera.hpp>
 
-ECS& ECS::Instance()
+ECS& ECS::Default()
 {
 	static ECS* ecs{ new ECS() };
 	return *ecs;

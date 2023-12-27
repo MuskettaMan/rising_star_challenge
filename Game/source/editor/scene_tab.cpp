@@ -6,7 +6,7 @@
 #include "engine/transform.hpp"
 #include <IconsFontAwesome6.h>
 
-SceneTab::SceneTab(ImGuiID dockID, IGraphics& graphics, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags) : BaseTab("Scene", dockID, windowFlags, ImVec2{0.0f, 0.0f}), _graphics(graphics), _selectedEntity(selectedEntity)
+SceneTab::SceneTab(ImGuiID dockID, IGraphics& graphics, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags, ECS& ecs) : BaseTab("Scene", dockID, windowFlags, ImVec2{0.0f, 0.0f}), _graphics(graphics), _selectedEntity(selectedEntity), _ecs(ecs)
 {
 }
 
@@ -110,8 +110,7 @@ void SceneTab::DrawContents()
 
 void SceneTab::DrawHandle(entt::entity entity)
 {
-	ECS& ecs{ ECS::Instance() };
-	auto cameraMatrixView{ ecs.Registry().view<CameraMatrix>() };
+	auto cameraMatrixView{ _ecs.Registry().view<CameraMatrix>() };
 	
 	// If no camera present, return early.
 	if (cameraMatrixView.empty())
@@ -121,10 +120,10 @@ void SceneTab::DrawHandle(entt::entity entity)
 	if (entity == cameraMatrixView[0])
 		return;
 
-	CameraMatrix& cameraMatrix{ ecs.Registry().get<CameraMatrix>(cameraMatrixView[0])};
+	CameraMatrix& cameraMatrix{ _ecs.Registry().get<CameraMatrix>(cameraMatrixView[0])};
 
-	Transform& transform = ecs.Registry().get<Transform>(entity);
-	const TransformMatrix& transformMatrix = ecs.Registry().get<const TransformMatrix>(entity);
+	Transform& transform = _ecs.Registry().get<Transform>(entity);
+	const TransformMatrix& transformMatrix = _ecs.Registry().get<const TransformMatrix>(entity);
 	XMMATRIX transformMat = transformMatrix.worldMatrix;
 
 	bool interacted = ImGuizmo::Manipulate(reinterpret_cast<float*>(cameraMatrix.view.r), reinterpret_cast<float*>(cameraMatrix.projection.r), static_cast<ImGuizmo::OPERATION>(_currentGizmo),

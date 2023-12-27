@@ -3,7 +3,7 @@
 class PhysicsWorld
 {
 public:
-	PhysicsWorld(std::unique_ptr<b2Draw> debugDrawer = nullptr);
+	PhysicsWorld(std::unique_ptr<b2Draw> debugDrawer = nullptr, ECS & ecs = ECS::Default());
 	void Update();
 
 	b2World& World() { return _world; }
@@ -11,6 +11,7 @@ public:
 
 private:
 	b2World _world;
+	ECS& _ecs;
 	std::unique_ptr<b2Draw> _debugDrawer;
 	
 	std::unordered_map<entt::entity, b2Body*> _bodies;

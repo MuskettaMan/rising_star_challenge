@@ -5,19 +5,19 @@
 #include "engine/ecs.hpp"
 #include <engine/transform.hpp>
 
-PhysicsWorld::PhysicsWorld(std::unique_ptr<b2Draw> debugDrawer) : _world(b2Vec2{ 0.0f, 0.0f }), _debugDrawer(std::move(debugDrawer)), _bodies()
+PhysicsWorld::PhysicsWorld(std::unique_ptr<b2Draw> debugDrawer, ECS& ecs) : _world(b2Vec2{ 0.0f, 0.0f }), _ecs(ecs), _debugDrawer(std::move(debugDrawer)), _bodies()
 {
 	_debugDrawer->SetFlags(b2Draw::e_shapeBit);
 	_world.SetDebugDraw(_debugDrawer.get());
 
-	ECS::Instance().Registry().on_construct<BoxCollider>().connect<&PhysicsWorld::OnBoxColliderCreate>(*this);
-	ECS::Instance().Registry().on_update<BoxCollider>().connect<&PhysicsWorld::OnBoxColliderUpdate>(*this);
-	ECS::Instance().Registry().on_destroy<BoxCollider>().connect<&PhysicsWorld::OnBoxColliderDestroy>(*this);
+	_ecs.Registry().on_construct<BoxCollider>().connect<&PhysicsWorld::OnBoxColliderCreate>(*this);
+	_ecs.Registry().on_update<BoxCollider>().connect<&PhysicsWorld::OnBoxColliderUpdate>(*this);
+	_ecs.Registry().on_destroy<BoxCollider>().connect<&PhysicsWorld::OnBoxColliderDestroy>(*this);
 }
 
 void PhysicsWorld::Update()
 {
-	auto view = ECS::Instance().Registry().view<BoxCollider, Transform>();
+	auto view = _ecs.Registry().view<BoxCollider, Transform>();
 	for (auto entity : view)
 	{
 		auto [collider, transform] = view.get(entity);

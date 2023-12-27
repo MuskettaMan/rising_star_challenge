@@ -26,7 +26,7 @@ class DX11Graphics : public IGraphics
 {
 public:
 
-	DX11Graphics(HWND hwndIn);
+	DX11Graphics(HWND hwndIn, ECS& ecs = ECS::Default());
 	virtual ~DX11Graphics();
 
 	virtual void BeginUpdate();
@@ -78,6 +78,8 @@ private:
 	void SetupRenderTexture();
 
 	ResourceHandle<Shader> _debugShader;
+
+	ECS& _ecs;
 
 	// Pairs a texture with a handle counter.
 	std::vector<DX11Texture> _textures;

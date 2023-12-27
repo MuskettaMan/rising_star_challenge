@@ -65,7 +65,7 @@ struct DrawObject
 class InspectorTab : public BaseTab
 {
 public:
-	InspectorTab(ImGuiID dockID, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags = ImGuiWindowFlags_None);
+	InspectorTab(ImGuiID dockID, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags = ImGuiWindowFlags_None, ECS &ecs = ECS::Default());
 
 protected:
 	virtual void DrawContents() override;
@@ -73,18 +73,19 @@ protected:
 
 private:
 	entt::entity& _selectedEntity;
+    ECS& _ecs;
 
     const std::string& GetIcon(size_t typeID) const;
 
     template <typename T>
     void TryInspect(entt::entity entity)
     {
-        T* component = ECS::Instance().Registry().try_get<T>(_selectedEntity);
+        T* component = _ecs.Registry().try_get<T>(_selectedEntity);
         if (component)
         {
             T copy{ *component };
             if(InspectObject(copy))
-                ECS::Instance().Registry().replace<T>(entity, copy);
+                _ecs.Registry().replace<T>(entity, copy);
         }
     }
 

@@ -14,6 +14,6 @@ struct HierarchyRoot
 
 };
 
-void AttachEntityToRoot(entt::entity entity);
-void AttachEntityToParent(entt::entity child, entt::entity parent);
-void RemoveEntityFromHierarchy(entt::entity entity);
+void AttachEntityToRoot(entt::entity entity, ECS& ecs = ECS::Default());
+void AttachEntityToParent(entt::entity child, entt::entity parent, ECS& ecs = ECS::Default());
+void RemoveEntityFromHierarchy(entt::entity entity, ECS& ecs = ECS::Default());

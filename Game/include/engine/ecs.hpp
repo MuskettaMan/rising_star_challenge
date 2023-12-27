@@ -6,13 +6,7 @@ struct CameraMatrix;
 class ECS
 {
 public:
-	static ECS& Instance();
-
-	ECS(const ECS&) = delete;
-	ECS& operator=(const ECS&) = delete;
-	ECS(ECS&&) noexcept = delete;
-	ECS& operator=(ECS&&) noexcept = delete;
-
+	static ECS& Default();
 
 	entt::registry& Registry() { return _registry; }
 	entt::entity CreateEntity();

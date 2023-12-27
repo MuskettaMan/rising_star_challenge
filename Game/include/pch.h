@@ -52,6 +52,6 @@ using namespace DirectX;
 constexpr bool ENABLE_EDITOR = true;
 
 // ECS
-//#include "engine/ecs.hpp"
+#include "engine/ecs.hpp"
 
 #include "engine/resource_handle.hpp"

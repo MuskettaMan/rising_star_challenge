@@ -7,7 +7,7 @@ class IGraphics;
 class SceneTab : public BaseTab
 {
 public:
-	SceneTab(ImGuiID dockID, IGraphics& graphics, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags = ImGuiWindowFlags_None);
+	SceneTab(ImGuiID dockID, IGraphics& graphics, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags = ImGuiWindowFlags_None, ECS& ecs = ECS::Default());
 
 protected:
 	virtual void DrawContents() override;
@@ -15,6 +15,7 @@ protected:
 private:
 	IGraphics& _graphics;
 	entt::entity& _selectedEntity;
+	ECS& _ecs;
 	
 	ImGuizmo::OPERATION _currentGizmo{ ImGuizmo::OPERATION::TRANSLATE };
 	ImGuizmo::MODE _mode{ ImGuizmo::MODE::LOCAL };

@@ -14,7 +14,7 @@ class Game : public IApplication
 {
 public:
 
-	Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input);
+	Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input, ECS& ecs = ECS::Default());
 	virtual ~Game();
 
 	virtual bool IsValid();
@@ -25,6 +25,8 @@ public:
 private:
 	void BuildMatrices();
 	void BuildChildMatrices(const TransformMatrix& parentMatrix, const HierarchyElement& parent);
+
+	ECS& _ecs;
 	entt::entity _root;
 	std::unique_ptr<PhysicsWorld> _physicsWorld;
 };

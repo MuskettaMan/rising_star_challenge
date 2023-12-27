@@ -21,7 +21,7 @@ std::unique_ptr<IApplication> GetApplication(std::shared_ptr<IGraphics> graphics
 	return std::make_unique<Game>(graphics, input);
 }
 
-Game::Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input) : IApplication(graphics, input), _physicsWorld(std::make_unique<PhysicsWorld>(std::make_unique<PhysicsDebugDrawer>(*_graphics)))
+Game::Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input, ECS& ecs) : IApplication(graphics, input), _physicsWorld(std::make_unique<PhysicsWorld>(std::make_unique<PhysicsDebugDrawer>(*_graphics))), _ecs(ecs)
 {
 }
 
@@ -36,41 +36,41 @@ bool Game::IsValid()
 
 bool Game::Load()
 {
-	_root = ECS::Instance().CreateEntity();
-	ECS::Instance().Registry().emplace<HierarchyElement>(_root);
-	ECS::Instance().Registry().emplace<HierarchyRoot>(_root);
-	ECS::Instance().Registry().emplace<TransformMatrix>(_root);
+	_root = _ecs.CreateEntity();
+	_ecs.Registry().emplace<HierarchyElement>(_root);
+	_ecs.Registry().emplace<HierarchyRoot>(_root);
+	_ecs.Registry().emplace<TransformMatrix>(_root);
 
-	entt::entity cameraEntity = ECS::Instance().CreateGameObject("Camera");
-	ECS::Instance().Registry().patch<Transform>(cameraEntity, [](auto& transform) { transform.position = { 50.0f, -50.0f }; });
-	ECS::Instance().Registry().emplace<HierarchyElement>(cameraEntity);
-	ECS::Instance().Registry().emplace<Camera>(cameraEntity, 80.0f, 0.1f, 20.0f);
-	ECS::Instance().Registry().emplace<CameraMatrix>(cameraEntity);
+	entt::entity cameraEntity = _ecs.CreateGameObject("Camera");
+	_ecs.Registry().patch<Transform>(cameraEntity, [](auto& transform) { transform.position = { 50.0f, -50.0f }; });
+	_ecs.Registry().emplace<HierarchyElement>(cameraEntity);
+	_ecs.Registry().emplace<Camera>(cameraEntity, 80.0f, 0.1f, 20.0f);
+	_ecs.Registry().emplace<CameraMatrix>(cameraEntity);
 
 	AttachEntityToRoot(cameraEntity);
 
 
-	entt::entity spriteEntity = ECS::Instance().CreateGameObject("Sprite renderer");
-	ECS::Instance().Registry().emplace<HierarchyElement>(spriteEntity);
-	ECS::Instance().Registry().patch<Transform>(spriteEntity, [](auto& transform) { transform.position = { 30.0f, -65.0f }; transform.scale = { 1.5f, 0.25f }; transform.rotation = -0.35f; });
-	ECS::Instance().Registry().emplace<BoxCollider>(spriteEntity, b2_staticBody, 16.0f, 16.0f);
-	auto& spriteRenderer = ECS::Instance().Registry().emplace<SpriteRenderer>(spriteEntity);
+	entt::entity spriteEntity = _ecs.CreateGameObject("Sprite renderer");
+	_ecs.Registry().emplace<HierarchyElement>(spriteEntity);
+	_ecs.Registry().patch<Transform>(spriteEntity, [](auto& transform) { transform.position = { 30.0f, -65.0f }; transform.scale = { 1.5f, 0.25f }; transform.rotation = -0.35f; });
+	_ecs.Registry().emplace<BoxCollider>(spriteEntity, b2_staticBody, 16.0f, 16.0f);
+	auto& spriteRenderer = _ecs.Registry().emplace<SpriteRenderer>(spriteEntity);
 	spriteRenderer.texture = _graphics->CreateTexture(L"assets\\textures\\sprite.dds");
 	spriteRenderer.shader = _graphics->CreateShader(L"assets\\shaders\\Unlit.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0");
 	spriteRenderer.mesh = _graphics->CreateBillboard(16.0f, 16.0f);
 
-	entt::entity spriteEntity3 = ECS::Instance().CreateGameObject("Sprite renderer");
-	ECS::Instance().Registry().emplace<HierarchyElement>(spriteEntity3);
-	ECS::Instance().Registry().patch<Transform>(spriteEntity3, [](auto& transform) { transform.position = { 45.0f, -69.0f }; transform.scale = { 0.5f, 0.25f }; });
-	ECS::Instance().Registry().emplace<BoxCollider>(spriteEntity3, b2_staticBody, 16.0f, 16.0f);
-	auto& spriteRenderer3 = ECS::Instance().Registry().emplace<SpriteRenderer>(spriteEntity3, spriteRenderer);
+	entt::entity spriteEntity3 = _ecs.CreateGameObject("Sprite renderer");
+	_ecs.Registry().emplace<HierarchyElement>(spriteEntity3);
+	_ecs.Registry().patch<Transform>(spriteEntity3, [](auto& transform) { transform.position = { 45.0f, -69.0f }; transform.scale = { 0.5f, 0.25f }; });
+	_ecs.Registry().emplace<BoxCollider>(spriteEntity3, b2_staticBody, 16.0f, 16.0f);
+	auto& spriteRenderer3 = _ecs.Registry().emplace<SpriteRenderer>(spriteEntity3, spriteRenderer);
 
-	entt::entity spriteEntity2 = ECS::Instance().CreateGameObject("Sprite renderer");
-	ECS::Instance().Registry().emplace<HierarchyElement>(spriteEntity2);
-	ECS::Instance().Registry().patch<Transform>(spriteEntity2, [](auto& transform) { transform.position = { 20.0f, 0.0f }; transform.scale = { 0.25f, 0.25f }; });
-	ECS::Instance().Registry().emplace<BoxCollider>(spriteEntity2, b2_dynamicBody, 16.0f, 16.0f);
+	entt::entity spriteEntity2 = _ecs.CreateGameObject("Sprite renderer");
+	_ecs.Registry().emplace<HierarchyElement>(spriteEntity2);
+	_ecs.Registry().patch<Transform>(spriteEntity2, [](auto& transform) { transform.position = { 20.0f, 0.0f }; transform.scale = { 0.25f, 0.25f }; });
+	_ecs.Registry().emplace<BoxCollider>(spriteEntity2, b2_dynamicBody, 16.0f, 16.0f);
 	_physicsWorld->GetBody(spriteEntity2).SetLinearVelocity({ 0.0f, -1.0f });
-	auto& spriteRenderer2 = ECS::Instance().Registry().emplace<SpriteRenderer>(spriteEntity2, spriteRenderer);
+	auto& spriteRenderer2 = _ecs.Registry().emplace<SpriteRenderer>(spriteEntity2, spriteRenderer);
 
 	AttachEntityToRoot(spriteEntity);
 	AttachEntityToRoot(spriteEntity2);
@@ -92,7 +92,7 @@ void Game::Cleanup()
 
 void Game::BuildMatrices()
 {
-	auto rootView = ECS::Instance().Registry().view<const HierarchyRoot, const HierarchyElement, TransformMatrix>();
+	auto rootView = _ecs.Registry().view<const HierarchyRoot, const HierarchyElement, TransformMatrix>();
 	auto [rootHierarchyElement, rootTransformMatrix] = rootView.get<const HierarchyElement, TransformMatrix>(*rootView.begin());
 
 	rootTransformMatrix.worldMatrix = XMMatrixIdentity();
@@ -107,9 +107,9 @@ void Game::BuildChildMatrices(const TransformMatrix& parentMatrix, const Hierarc
 	{
 		entt::entity child = parent.children[i];
 
-		const auto& childHierarchyElement = ECS::Instance().Registry().get<HierarchyElement>(child);
-		const auto& childTransform = ECS::Instance().Registry().get<Transform>(child);
-		auto& childTransformMatrix = ECS::Instance().Registry().get<TransformMatrix>(child);
+		const auto& childHierarchyElement = _ecs.Registry().get<HierarchyElement>(child);
+		const auto& childTransform = _ecs.Registry().get<Transform>(child);
+		auto& childTransformMatrix = _ecs.Registry().get<TransformMatrix>(child);
 
 		childTransformMatrix.localMatrix = XMMatrixIdentity();
 		XMMATRIX translation = XMMatrixTranslation(childTransform.position.x, childTransform.position.y, 0.0f);

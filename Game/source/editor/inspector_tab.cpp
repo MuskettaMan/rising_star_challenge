@@ -18,7 +18,7 @@ const std::unordered_map<size_t, std::string> typeToIconMap = {
 
 const std::string defaultIcon{ ICON_FA_PUZZLE_PIECE };
 
-InspectorTab::InspectorTab(ImGuiID dockID, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags) : BaseTab("Inspector", dockID, windowFlags), _selectedEntity(selectedEntity)
+InspectorTab::InspectorTab(ImGuiID dockID, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags, ECS& ecs) : BaseTab("Inspector", dockID, windowFlags), _selectedEntity(selectedEntity), _ecs(ecs)
 {
 }
 
@@ -26,7 +26,7 @@ void InspectorTab::DrawContents()
 {
 	if (_selectedEntity != entt::null)
 	{
-		GameObject& gameObject = ECS::Instance().Registry().get<GameObject>(_selectedEntity);
+		GameObject& gameObject = _ecs.Registry().get<GameObject>(_selectedEntity);
 
 		char nameBuffer[64];
 		std::strcpy(nameBuffer, gameObject.name.c_str());

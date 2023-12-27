@@ -6,7 +6,7 @@
 #include <engine/transform.hpp>
 #include <engine/sprite_renderer.hpp>
 
-DX11Graphics::DX11Graphics(HWND hwndIn) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferRTV(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0)
+DX11Graphics::DX11Graphics(HWND hwndIn, ECS& ecs) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferRTV(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0), _ecs(ecs)
 {
     RECT dimensions;
     GetClientRect(_hwnd, &dimensions);
@@ -102,7 +102,7 @@ void DX11Graphics::BeginUpdate()
 {
     ImGui_ImplDX11_NewFrame();
 
-    auto view = ECS::Instance().Registry().view<Camera, CameraMatrix, TransformMatrix>();
+    auto view = _ecs.Registry().view<Camera, CameraMatrix, TransformMatrix>();
     entt::entity entity = *view.begin();
     auto [camera, cameraMatrix, transformMatrix] = view.get(entity);
 
@@ -142,7 +142,7 @@ void DX11Graphics::Update()
         _context->OMSetRenderTargets(1, ENABLE_EDITOR ? _renderTextureRTV.GetAddressOf() : _backbufferRTV.GetAddressOf(), nullptr);
 
 
-        auto spriteRendererView = ECS::Instance().Registry().view<const SpriteRenderer, const TransformMatrix>();
+        auto spriteRendererView = _ecs.Registry().view<const SpriteRenderer, const TransformMatrix>();
         for (const entt::entity spriteRendererEntity : spriteRendererView)
         {
             auto [spriteRenderer, transformMatrix]{spriteRendererView.get(spriteRendererEntity)};
@@ -400,8 +400,8 @@ void DX11Graphics::SetScreenSize(uint32_t width, uint32_t height)
 
 void DX11Graphics::SetWorldMatrix(const TransformMatrix& transform)
 {
-    Camera& camera = ECS::Instance().GetCamera();
-    CameraMatrix& cameraMatrix = ECS::Instance().GetCameraMatrix();
+    Camera& camera = _ecs.GetCamera();
+    CameraMatrix& cameraMatrix = _ecs.GetCameraMatrix();
 
     XMMATRIX mvp = XMMatrixMultiply(transform.worldMatrix, DirectX::XMMatrixMultiply(cameraMatrix.view, cameraMatrix.projection));
     mvp = XMMatrixTranspose(mvp);
