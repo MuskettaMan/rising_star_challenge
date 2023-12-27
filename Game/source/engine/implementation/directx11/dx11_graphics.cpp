@@ -106,8 +106,11 @@ void DX11Graphics::BeginUpdate()
     entt::entity entity = *view.begin();
     auto [camera, cameraMatrix, transformMatrix] = view.get(entity);
 
-    float halfWidth = static_cast<float>(_windowWidth / 2) * camera.size;
-    float halfHeight = static_cast<float>(_windowHeight / 2) * camera.size;
+    float halfWidth = static_cast<float>(_windowWidth / 2);
+    float halfHeight = static_cast<float>(_windowHeight / 2);
+    float aspectRatio = halfWidth / halfHeight;
+    halfWidth = std::fmaxf(camera.size, 0.01f);
+    halfHeight = halfWidth / aspectRatio;
 
     transformMatrix.worldMatrix *= XMMatrixTranslationFromVector(XMVECTOR{ 0, 0, -10.0f });
     XMVECTOR determinant = XMMatrixDeterminant(transformMatrix.worldMatrix);
@@ -183,7 +186,7 @@ void DX11Graphics::Update()
             D3D11_BUFFER_DESC lineBufferDesc;
             ZeroMemory(&lineBufferDesc, sizeof(lineBufferDesc));
             lineBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-            lineBufferDesc.ByteWidth = sizeof(BillboardVertex) * _lines.size();
+            lineBufferDesc.ByteWidth = static_cast<UINT>(sizeof(BillboardVertex) * _lines.size());
             lineBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
             D3D11_SUBRESOURCE_DATA initData;
@@ -197,7 +200,7 @@ void DX11Graphics::Update()
             uint32_t offset = 0;
             _context->IASetVertexBuffers(0, 1, lineBuffer.GetAddressOf(), &stride, &offset);
             _context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-            _context->Draw(_lines.size(), 0);
+            _context->Draw(static_cast<UINT>(_lines.size()), 0);
         }
 
 

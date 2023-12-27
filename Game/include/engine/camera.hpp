@@ -12,7 +12,7 @@ struct CameraMatrix
 
 struct Camera
 {
-	float size{ 1.0f };
+	float size{ 30.0f };
 	float nearPlane{ 0.1f };
 	float farPlane{ 20.0f };
 };

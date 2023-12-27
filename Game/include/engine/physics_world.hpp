@@ -6,7 +6,8 @@ public:
 	PhysicsWorld(std::unique_ptr<b2Draw> debugDrawer = nullptr);
 	void Update();
 
-	b2World& World() { return _world;  }
+	b2World& World() { return _world; }
+	b2Body& GetBody(entt::entity entity) { return *_bodies[entity]; }
 
 private:
 	b2World _world;

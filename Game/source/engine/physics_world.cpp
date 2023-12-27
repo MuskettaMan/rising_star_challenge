@@ -5,7 +5,7 @@
 #include "engine/ecs.hpp"
 #include <engine/transform.hpp>
 
-PhysicsWorld::PhysicsWorld(std::unique_ptr<b2Draw> debugDrawer) : _world(b2Vec2{ 0.0f, -10.0f }), _debugDrawer(std::move(debugDrawer)), _bodies()
+PhysicsWorld::PhysicsWorld(std::unique_ptr<b2Draw> debugDrawer) : _world(b2Vec2{ 0.0f, 0.0f }), _debugDrawer(std::move(debugDrawer)), _bodies()
 {
 	_debugDrawer->SetFlags(b2Draw::e_shapeBit);
 	_world.SetDebugDraw(_debugDrawer.get());
@@ -49,14 +49,18 @@ void PhysicsWorld::OnBoxColliderCreate(entt::registry& registry, entt::entity en
 	def.type = boxCollider.type;
 	def.position = { transform.position.x, transform.position.y };
 	def.angle = transform.rotation;
+
 	auto body = _world.CreateBody(&def);
 	_bodies.emplace(entity, body);
+	
 	b2PolygonShape shape;
-	shape.SetAsBox(boxCollider.width * transform.scale.x, boxCollider.height * transform.scale.y);
+	shape.SetAsBox(boxCollider.width / 2.0f * transform.scale.x, boxCollider.height / 2.0f * transform.scale.y);
+	
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &shape;
 	fixtureDef.density = 1.0f;
 	fixtureDef.friction = 0.3f;
+	
 	body->CreateFixture(&fixtureDef);
 }
 
