@@ -49,6 +49,7 @@ void PhysicsWorld::OnBoxColliderCreate(entt::registry& registry, entt::entity en
 	def.type = boxCollider.type;
 	def.position = { transform.position.x, transform.position.y };
 	def.angle = transform.rotation;
+	def.linearDamping = 1.0f;
 
 	auto body = _world.CreateBody(&def);
 	_bodies.emplace(entity, body);
@@ -59,7 +60,7 @@ void PhysicsWorld::OnBoxColliderCreate(entt::registry& registry, entt::entity en
 	b2FixtureDef fixtureDef;
 	fixtureDef.shape = &shape;
 	fixtureDef.density = 1.0f;
-	fixtureDef.friction = 0.3f;
+	fixtureDef.friction = 1.0f;
 	
 	body->CreateFixture(&fixtureDef);
 }

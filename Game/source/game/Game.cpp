@@ -9,7 +9,7 @@
 #include <engine/sprite_renderer.hpp>
 #include "entt/core/hashed_string.hpp"
 #include <engine/hierarchy_element.hpp>
-
+#include "engine/input_handler.hpp"
 #include "engine/box_collider.hpp"
 #include "engine/physics_world.hpp"
 #include <engine/physics_debug_drawer.hpp>
@@ -21,7 +21,11 @@ std::unique_ptr<IApplication> GetApplication(std::shared_ptr<IGraphics> graphics
 	return std::make_unique<Game>(graphics, input);
 }
 
-Game::Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input, ECS& ecs) : IApplication(graphics, input), _physicsWorld(std::make_unique<PhysicsWorld>(std::make_unique<PhysicsDebugDrawer>(*_graphics))), _ecs(ecs)
+Game::Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input, ECS& ecs) : 
+	IApplication(graphics, input), 
+	_physicsWorld(std::make_unique<PhysicsWorld>(std::make_unique<PhysicsDebugDrawer>(*_graphics))), 
+	_inputHandler(std::make_unique<InputHandler>(*input)),
+	_ecs(ecs)
 {
 }
 
@@ -32,6 +36,16 @@ Game::~Game()
 bool Game::IsValid()
 {
 	return true;
+}
+
+void Game::HorizontalMovement(float value)
+{
+	_physicsWorld->GetBody(_dynamic).ApplyLinearImpulseToCenter({ value * 1.0f, 0.0f }, true);
+}
+
+void Game::VerticalMovement(float value)
+{
+	_physicsWorld->GetBody(_dynamic).ApplyLinearImpulseToCenter({ 0.0f, value * 1.0f }, true);
 }
 
 bool Game::Load()
@@ -69,18 +83,31 @@ bool Game::Load()
 	_ecs.Registry().emplace<HierarchyElement>(spriteEntity2);
 	_ecs.Registry().patch<Transform>(spriteEntity2, [](auto& transform) { transform.position = { 20.0f, 0.0f }; transform.scale = { 0.25f, 0.25f }; });
 	_ecs.Registry().emplace<BoxCollider>(spriteEntity2, b2_dynamicBody, 16.0f, 16.0f);
-	_physicsWorld->GetBody(spriteEntity2).SetLinearVelocity({ 0.0f, -1.0f });
+	//_physicsWorld->GetBody(spriteEntity2).SetLinearVelocity({ 0.0f, -1.0f });
 	auto& spriteRenderer2 = _ecs.Registry().emplace<SpriteRenderer>(spriteEntity2, spriteRenderer);
+
+	_dynamic = spriteEntity2;
 
 	AttachEntityToRoot(spriteEntity);
 	AttachEntityToRoot(spriteEntity2);
 	AttachEntityToRoot(spriteEntity3);
+
+	AxisInputSetting horizontalSetting{};
+	horizontalSetting.gamepad = GamepadInput::LeftStickXAxis;
+	horizontalSetting.keyboard = { KeyboardInput::A, KeyboardInput::D };
+	_inputHandler->RegisterAxisInput(horizontalSetting, [this](float value) { HorizontalMovement(value); });
+
+	AxisInputSetting verticalSetting{};
+	verticalSetting.gamepad = GamepadInput::LeftStickYAxis;
+	verticalSetting.keyboard = { KeyboardInput::S, KeyboardInput::W };
+	_inputHandler->RegisterAxisInput(verticalSetting, [this](float value) { VerticalMovement(value); });
 
 	return true;
 }
 
 void Game::Update()
 {
+	_inputHandler->Update();
 	_physicsWorld->Update();
 	BuildMatrices();
 }

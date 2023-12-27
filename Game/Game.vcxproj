@@ -131,6 +131,7 @@
     <ClCompile Include="source\engine\implementation\directx11\dx11_texture.cpp" />
     <ClCompile Include="source\engine\implementation\directx11\dx11_shader.cpp" />
     <ClCompile Include="source\engine\implementation\xinput\dx_input.cpp" />
+    <ClCompile Include="source\engine\input_handler.cpp" />
     <ClCompile Include="source\engine\physics_debug_drawer.cpp" />
     <ClCompile Include="source\engine\physics_world.cpp" />
     <ClCompile Include="source\engine\resource_handle.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="include\engine\implementation\directx11\dx11_texture.hpp" />
     <ClInclude Include="include\engine\implementation\directx11\dx11_shader.hpp" />
     <ClInclude Include="include\engine\implementation\xinput\dx_input.hpp" />
+    <ClInclude Include="include\engine\input_handler.hpp" />
     <ClInclude Include="include\engine\mesh.hpp" />
     <ClInclude Include="include\engine\physics_debug_drawer.hpp" />
     <ClInclude Include="include\engine\physics_world.hpp" />
