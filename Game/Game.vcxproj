@@ -173,6 +173,7 @@
     <ClInclude Include="include\engine\physics_world.hpp" />
     <ClInclude Include="include\engine\resource_handle.hpp" />
     <ClInclude Include="include\engine\shader.hpp" />
+    <ClInclude Include="include\engine\sprite_animation.hpp" />
     <ClInclude Include="include\engine\sprite_renderer.hpp" />
     <ClInclude Include="include\engine\texture.hpp" />
     <ClInclude Include="include\engine\transform.hpp" />

@@ -13,6 +13,7 @@
 #include "engine/box_collider.hpp"
 #include "engine/physics_world.hpp"
 #include <engine/physics_debug_drawer.hpp>
+#include <engine/sprite_animation.hpp>
 
 using namespace entt::literals;
 
@@ -40,12 +41,12 @@ bool Game::IsValid()
 
 void Game::HorizontalMovement(float value)
 {
-	_physicsWorld->GetBody(_dynamic).ApplyLinearImpulseToCenter({ value * 1.0f, 0.0f }, true);
+	_physicsWorld->GetBody(_character).ApplyLinearImpulseToCenter({ value * 1.0f, 0.0f }, true);
 }
 
 void Game::VerticalMovement(float value)
 {
-	_physicsWorld->GetBody(_dynamic).ApplyLinearImpulseToCenter({ 0.0f, value * 1.0f }, true);
+	_physicsWorld->GetBody(_character).ApplyLinearImpulseToCenter({ 0.0f, value * 1.0f }, true);
 }
 
 bool Game::Load()
@@ -79,17 +80,30 @@ bool Game::Load()
 	_ecs.Registry().emplace<BoxCollider>(spriteEntity3, b2_staticBody, 16.0f, 16.0f);
 	auto& spriteRenderer3 = _ecs.Registry().emplace<SpriteRenderer>(spriteEntity3, spriteRenderer);
 
-	entt::entity spriteEntity2 = _ecs.CreateGameObject("Sprite renderer");
-	_ecs.Registry().emplace<HierarchyElement>(spriteEntity2);
-	_ecs.Registry().patch<Transform>(spriteEntity2, [](auto& transform) { transform.position = { 20.0f, 0.0f }; transform.scale = { 0.25f, 0.25f }; });
-	_ecs.Registry().emplace<BoxCollider>(spriteEntity2, b2_dynamicBody, 16.0f, 16.0f);
-	//_physicsWorld->GetBody(spriteEntity2).SetLinearVelocity({ 0.0f, -1.0f });
-	auto& spriteRenderer2 = _ecs.Registry().emplace<SpriteRenderer>(spriteEntity2, spriteRenderer);
+	entt::entity characterEntity = _ecs.CreateGameObject("Character");
+	_ecs.Registry().emplace<HierarchyElement>(characterEntity);
+	_ecs.Registry().patch<Transform>(characterEntity, [](auto& transform) { transform.position = { 20.0f, 0.0f }; transform.scale = { 1.0f, 1.0f }; });
+	_ecs.Registry().emplace<BoxCollider>(characterEntity, b2_dynamicBody, 16.0f, 16.0f);
+	auto& characterRenderer = _ecs.Registry().emplace<SpriteRenderer>(characterEntity, spriteRenderer);
 
-	_dynamic = spriteEntity2;
+	_textures[0] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\idle_40x40.dds");
+	_textures[1] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\death_40x40.dds");
+	_textures[2] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\attack_40x40.dds");
+	_textures[3] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\run_40x40.dds");
+
+	_sheets[0] = _graphics->CreateSpritesheet(_textures[0], 4, 4);
+	_sheets[1] = _graphics->CreateSpritesheet(_textures[1], 9, 4);
+	_sheets[2] = _graphics->CreateSpritesheet(_textures[2], 7, 4);
+	_sheets[3] = _graphics->CreateSpritesheet(_textures[3], 6, 4);
+
+	characterRenderer.texture = _textures[0];
+	
+	_ecs.Registry().emplace<SpriteAnimation>(characterEntity, _sheets[0], 1.0f / 4.0f, 0u, 1u);
+
+	_character = characterEntity;
 
 	AttachEntityToRoot(spriteEntity);
-	AttachEntityToRoot(spriteEntity2);
+	AttachEntityToRoot(characterEntity);
 	AttachEntityToRoot(spriteEntity3);
 
 	AxisInputSetting horizontalSetting{};
@@ -107,6 +121,26 @@ bool Game::Load()
 
 void Game::Update()
 {
+	static float time = 0.0f;
+	time += 0.01f;
+
+	static size_t index = 0;
+	if (_input->IsPressed(KeyboardInput::Num1))
+		index = 0;
+	if (_input->IsPressed(KeyboardInput::Num2))
+		index = 1;
+	if (_input->IsPressed(KeyboardInput::Num3))
+		index = 2;
+	if (_input->IsPressed(KeyboardInput::Num4))
+		index = 3;
+
+	size_t indexC{index};
+	_ecs.Registry().patch<SpriteAnimation>(_character, [&indexC, this](auto& animation) { 
+		animation.spritesheet = _sheets[indexC];
+		animation.currentColumn = static_cast<uint32_t>(time) % _graphics->GetSpritesheet(animation.spritesheet).columns; 
+		animation.currentRow = static_cast<uint32_t>(time) / _graphics->GetSpritesheet(animation.spritesheet).rows;
+	});
+
 	_inputHandler->Update();
 	_physicsWorld->Update();
 	BuildMatrices();

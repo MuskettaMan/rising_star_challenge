@@ -5,6 +5,7 @@
 #include <engine/ecs.hpp>
 #include <engine/transform.hpp>
 #include <engine/sprite_renderer.hpp>
+#include <engine/sprite_animation.hpp>
 
 DX11Graphics::DX11Graphics(HWND hwndIn, ECS& ecs) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferRTV(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0), _ecs(ecs)
 {
@@ -66,7 +67,18 @@ DX11Graphics::DX11Graphics(HWND hwndIn, ECS& ecs) : _device(nullptr), _context(n
         constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
         constDesc.ByteWidth = sizeof(DirectX::XMMATRIX);
         constDesc.Usage = D3D11_USAGE_DEFAULT;
-        hr = _device->CreateBuffer(&constDesc, 0, &_mvp);
+        hr = _device->CreateBuffer(&constDesc, 0, _mvp.GetAddressOf());
+
+        if (FAILED(hr))
+        {
+            MessageBox(NULL, "Graphics Failed to create MVP Buffer", "Error!", MB_ICONEXCLAMATION | MB_OK);
+        }
+
+        ZeroMemory(&constDesc, sizeof(constDesc));
+        constDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+        constDesc.ByteWidth = sizeof(DirectX::XMINT4);
+        constDesc.Usage = D3D11_USAGE_DEFAULT;
+        hr = _device->CreateBuffer(&constDesc, 0, _spriteAnimationBuffer.GetAddressOf());
 
         if (FAILED(hr))
         {
@@ -142,7 +154,7 @@ void DX11Graphics::Update()
         _context->OMSetRenderTargets(1, ENABLE_EDITOR ? _renderTextureRTV.GetAddressOf() : _backbufferRTV.GetAddressOf(), nullptr);
 
 
-        auto spriteRendererView = _ecs.Registry().view<const SpriteRenderer, const TransformMatrix>();
+        auto spriteRendererView = _ecs.Registry().view<const SpriteRenderer, const TransformMatrix>(entt::exclude<SpriteAnimation>);
         for (const entt::entity spriteRendererEntity : spriteRendererView)
         {
             auto [spriteRenderer, transformMatrix]{spriteRendererView.get(spriteRendererEntity)};
@@ -159,6 +171,34 @@ void DX11Graphics::Update()
 
             _context->OMSetBlendState(_blendState.Get(), nullptr, ~0U);
             SetWorldMatrix(transformMatrix);
+            SetSpriteAnimation(1, 1, 0, 0);
+
+            _context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+            _context->IASetIndexBuffer(mesh._indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+            _context->IASetVertexBuffers(0, 1, mesh._vertexBuffer.GetAddressOf(), &mesh._vertexStride, &mesh._vertexOffset);
+            _context->DrawIndexed(mesh._vertexCount, 0, 0);
+        }
+
+        auto spriteRendererAnimationView = _ecs.Registry().view<const SpriteRenderer, const TransformMatrix, const SpriteAnimation>();
+
+        for (const entt::entity spriteRendererEntity : spriteRendererAnimationView)
+        {
+            auto [spriteRenderer, transformMatrix, spriteAnimation] { spriteRendererAnimationView.get(spriteRendererEntity) };
+            const DX11Mesh& mesh = _meshes[spriteRenderer.mesh.Id()];
+            const DX11Shader& shader = _shaders[spriteRenderer.shader.Id()];
+            const Spritesheet& spritesheet = _spritesheets[spriteAnimation.spritesheet.Id()];
+            const DX11Texture& texture = _textures[spritesheet.texture.Id()];
+
+            _context->IASetInputLayout(shader._inputLayout.Get());
+            _context->VSSetShader(shader._vertexShader.Get(), 0, 0);
+            _context->PSSetShader(shader._pixelShader.Get(), 0, 0);
+
+            _context->PSSetShaderResources(0, 1, texture._srv.GetAddressOf());
+            _context->PSSetSamplers(0, 1, texture._sampler.GetAddressOf());
+
+            _context->OMSetBlendState(_blendState.Get(), nullptr, ~0U);
+            SetWorldMatrix(transformMatrix);
+            SetSpriteAnimation(spritesheet.columns, spritesheet.rows, spriteAnimation.currentColumn, spriteAnimation.currentRow);
 
             _context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
             _context->IASetIndexBuffer(mesh._indexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
@@ -244,7 +284,7 @@ ResourceHandle<Texture> DX11Graphics::CreateTexture(const wchar_t* filepath)
             colorMapDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
             colorMapDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
             colorMapDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-            colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+            colorMapDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_POINT;
             colorMapDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
             hr = _device->CreateSamplerState(&colorMapDesc, sampler.GetAddressOf());
@@ -371,6 +411,12 @@ ResourceHandle<Mesh> DX11Graphics::CreateBillboard(float width, float height)
     return ResourceHandle<Mesh>();
 }
 
+ResourceHandle<Spritesheet> DX11Graphics::CreateSpritesheet(ResourceHandle<Texture> texture, uint32_t columns, uint32_t rows)
+{
+    _spritesheets.emplace_back(texture, columns, rows);
+    return ResourceHandle<Spritesheet>(_spritesheets.size() - 1);
+}
+
 void DX11Graphics::DrawLine(XMFLOAT2 from, XMFLOAT2 to, XMFLOAT3 color)
 {
     _lines.emplace_back(BillboardVertex{ XMFLOAT3{from.x, from.y, 0.0f}, XMFLOAT2{ 0.0f, 0.0f }, color });
@@ -407,6 +453,13 @@ void DX11Graphics::SetWorldMatrix(const TransformMatrix& transform)
     mvp = XMMatrixTranspose(mvp);
     _context->UpdateSubresource(_mvp.Get(), 0, 0, &mvp, 0, 0);
     _context->VSSetConstantBuffers(0, 1, _mvp.GetAddressOf());
+}
+
+void DX11Graphics::SetSpriteAnimation(int columns, int rows, int currColumn, int currRow)
+{
+    XMINT4 animationBuffer(columns, rows, currColumn, currRow);
+    _context->UpdateSubresource(_spriteAnimationBuffer.Get(), 0, 0, &animationBuffer, 0, 0);
+    _context->VSSetConstantBuffers(1, 1, _spriteAnimationBuffer.GetAddressOf());
 }
 
 bool DX11Graphics::CompileShader(LPCWSTR filepath, LPCSTR entry, LPCSTR shader, ID3DBlob** buffer)

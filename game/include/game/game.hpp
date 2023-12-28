@@ -2,6 +2,7 @@
 #pragma once
 
 #include "engine/IApplication.h"
+#include "engine/sprite_animation.hpp"
 
 class PhysicsWorld;
 class IGraphics;
@@ -34,6 +35,8 @@ private:
 	std::unique_ptr<PhysicsWorld> _physicsWorld;
 	std::unique_ptr<InputHandler> _inputHandler;
 
-	entt::entity _dynamic;
+	entt::entity _character;
+	std::array<ResourceHandle<Spritesheet>, 4> _sheets;
+	std::array<ResourceHandle<Texture>, 4> _textures;
 };
 
