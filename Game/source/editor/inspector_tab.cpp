@@ -9,11 +9,15 @@
 #include <typeinfo>
 
 #include "engine/box_collider.hpp"
+#include <game/character_controller.hpp>
 
 const std::unordered_map<size_t, std::string> typeToIconMap = {
 	{ typeid(Transform).hash_code(), std::string(ICON_FA_UP_DOWN_LEFT_RIGHT) },
 	{ typeid(Camera).hash_code(), std::string(ICON_FA_VIDEO) },
 	{ typeid(SpriteRenderer).hash_code(), std::string(ICON_FA_IMAGE) },
+	{ typeid(SpriteAnimation).hash_code(), std::string(ICON_FA_SHEET_PLASTIC) },
+	{ typeid(CharacterController).hash_code(), std::string(ICON_FA_PERSON) },
+	{ typeid(CharacterAnimations).hash_code(), std::string(ICON_FA_PERSON_RUNNING) },
 };
 
 const std::string defaultIcon{ ICON_FA_PUZZLE_PIECE };
@@ -39,6 +43,9 @@ void InspectorTab::DrawContents()
 		TryInspect<Camera>(_selectedEntity);
 		TryInspect<SpriteRenderer>(_selectedEntity);
 		TryInspect<BoxCollider>(_selectedEntity);
+		TryInspect<CharacterController>(_selectedEntity);
+		TryInspect<CharacterAnimations>(_selectedEntity);
+		TryInspect<SpriteAnimation>(_selectedEntity);
 	}
 }
 

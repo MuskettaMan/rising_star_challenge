@@ -136,6 +136,7 @@
     <ClCompile Include="source\engine\physics_world.cpp" />
     <ClCompile Include="source\engine\resource_handle.cpp" />
     <ClCompile Include="source\entry_points\windows_main.cpp" />
+    <ClCompile Include="source\game\character_controller.cpp" />
     <ClCompile Include="source\game\game.cpp" />
     <ClCompile Include="third_party\imgui\backends\imgui_impl_dx11.cpp" />
     <ClCompile Include="third_party\imgui\backends\imgui_impl_win32.cpp" />
@@ -156,6 +157,7 @@
     <ClInclude Include="include\editor\scene_tab.hpp" />
     <ClInclude Include="include\engine\box_collider.hpp" />
     <ClInclude Include="include\engine\camera.hpp" />
+    <ClInclude Include="include\engine\direction.hpp" />
     <ClInclude Include="include\engine\ecs.hpp" />
     <ClInclude Include="include\engine\gameobject.hpp" />
     <ClInclude Include="include\engine\hierarchy_element.hpp" />
@@ -177,6 +179,7 @@
     <ClInclude Include="include\engine\sprite_renderer.hpp" />
     <ClInclude Include="include\engine\texture.hpp" />
     <ClInclude Include="include\engine\transform.hpp" />
+    <ClInclude Include="include\game\character_controller.hpp" />
     <ClInclude Include="include\game\game.hpp" />
     <ClInclude Include="include\pch.h" />
     <ClInclude Include="third_party\entt\entt.hpp" />

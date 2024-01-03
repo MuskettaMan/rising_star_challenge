@@ -14,6 +14,7 @@
 #include "engine/physics_world.hpp"
 #include <engine/physics_debug_drawer.hpp>
 #include <engine/sprite_animation.hpp>
+#include <game/character_controller.hpp>
 
 using namespace entt::literals;
 
@@ -37,16 +38,6 @@ Game::~Game()
 bool Game::IsValid()
 {
 	return true;
-}
-
-void Game::HorizontalMovement(float value)
-{
-	_physicsWorld->GetBody(_character).ApplyLinearImpulseToCenter({ value * 1.0f, 0.0f }, true);
-}
-
-void Game::VerticalMovement(float value)
-{
-	_physicsWorld->GetBody(_character).ApplyLinearImpulseToCenter({ 0.0f, value * 1.0f }, true);
 }
 
 bool Game::Load()
@@ -80,33 +71,15 @@ bool Game::Load()
 	_ecs.Registry().emplace<BoxCollider>(spriteEntity3, b2_staticBody, 16.0f, 16.0f);
 	auto& spriteRenderer3 = _ecs.Registry().emplace<SpriteRenderer>(spriteEntity3, spriteRenderer);
 
-	entt::entity characterEntity = _ecs.CreateGameObject("Character");
-	_ecs.Registry().emplace<HierarchyElement>(characterEntity);
-	_ecs.Registry().patch<Transform>(characterEntity, [](auto& transform) { transform.position = { 20.0f, 0.0f }; transform.scale = { 1.0f, 1.0f }; });
-	_ecs.Registry().emplace<BoxCollider>(characterEntity, b2_dynamicBody, 16.0f, 16.0f);
-	auto& characterRenderer = _ecs.Registry().emplace<SpriteRenderer>(characterEntity, spriteRenderer);
 
-	_textures[0] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\idle_40x40.dds");
-	_textures[1] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\death_40x40.dds");
-	_textures[2] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\attack_40x40.dds");
-	_textures[3] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\run_40x40.dds");
-
-	_sheets[0] = _graphics->CreateSpritesheet(_textures[0], 4, 4);
-	_sheets[1] = _graphics->CreateSpritesheet(_textures[1], 9, 4);
-	_sheets[2] = _graphics->CreateSpritesheet(_textures[2], 7, 4);
-	_sheets[3] = _graphics->CreateSpritesheet(_textures[3], 6, 4);
-
-	characterRenderer.texture = _textures[0];
-	
-	_ecs.Registry().emplace<SpriteAnimation>(characterEntity, _sheets[0], 1.0f / 4.0f, 0u, 1u);
-
-	_character = characterEntity;
+	_character = CreateCharacter();
 
 	AttachEntityToRoot(spriteEntity);
-	AttachEntityToRoot(characterEntity);
 	AttachEntityToRoot(spriteEntity3);
 
-	AxisInputSetting horizontalSetting{};
+	
+	// Legacy inputs, might be useful later.
+	/*AxisInputSetting horizontalSetting{};
 	horizontalSetting.gamepad = GamepadInput::LeftStickXAxis;
 	horizontalSetting.keyboard = { KeyboardInput::A, KeyboardInput::D };
 	_inputHandler->RegisterAxisInput(horizontalSetting, [this](float value) { HorizontalMovement(value); });
@@ -114,34 +87,18 @@ bool Game::Load()
 	AxisInputSetting verticalSetting{};
 	verticalSetting.gamepad = GamepadInput::LeftStickYAxis;
 	verticalSetting.keyboard = { KeyboardInput::S, KeyboardInput::W };
-	_inputHandler->RegisterAxisInput(verticalSetting, [this](float value) { VerticalMovement(value); });
+	_inputHandler->RegisterAxisInput(verticalSetting, [this](float value) { VerticalMovement(value); });*/
 
 	return true;
 }
 
 void Game::Update()
 {
-	static float time = 0.0f;
-	time += 0.01f;
-
-	static size_t index = 0;
-	if (_input->IsPressed(KeyboardInput::Num1))
-		index = 0;
-	if (_input->IsPressed(KeyboardInput::Num2))
-		index = 1;
-	if (_input->IsPressed(KeyboardInput::Num3))
-		index = 2;
-	if (_input->IsPressed(KeyboardInput::Num4))
-		index = 3;
-
-	size_t indexC{index};
-	_ecs.Registry().patch<SpriteAnimation>(_character, [&indexC, this](auto& animation) { 
-		animation.spritesheet = _sheets[indexC];
-		animation.currentColumn = static_cast<uint32_t>(time) % _graphics->GetSpritesheet(animation.spritesheet).columns; 
-		animation.currentRow = static_cast<uint32_t>(time) / _graphics->GetSpritesheet(animation.spritesheet).rows;
-	});
-
 	_inputHandler->Update();
+
+	UpdateCharacterControllers(*_input, *_physicsWorld);
+	UpdateCharacterAnimations(*_graphics);
+
 	_physicsWorld->Update();
 	BuildMatrices();
 }
@@ -185,4 +142,37 @@ void Game::BuildChildMatrices(const TransformMatrix& parentMatrix, const Hierarc
 
 		BuildChildMatrices(childTransformMatrix, childHierarchyElement);
 	}
+}
+
+entt::entity Game::CreateCharacter()
+{
+	entt::entity characterEntity = _ecs.CreateGameObject("Character");
+	_ecs.Registry().emplace<HierarchyElement>(characterEntity);
+	_ecs.Registry().patch<Transform>(characterEntity, [](auto& transform) { transform.position = { 20.0f, 0.0f }; transform.scale = { 1.0f, 1.0f }; });
+	_ecs.Registry().emplace<BoxCollider>(characterEntity, b2_dynamicBody, 8.0f, 8.0f);
+	_ecs.Registry().emplace<CharacterController>(characterEntity, 3.0f);
+
+	_textures[0] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\idle_40x40.dds");
+	_textures[1] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\death_40x40.dds");
+	_textures[2] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\attack_40x40.dds");
+	_textures[3] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\run_40x40.dds");
+
+	_sheets[0] = _graphics->CreateSpritesheet(_textures[0], 4, 4);
+	_sheets[1] = _graphics->CreateSpritesheet(_textures[1], 9, 4);
+	_sheets[2] = _graphics->CreateSpritesheet(_textures[2], 7, 4);
+	_sheets[3] = _graphics->CreateSpritesheet(_textures[3], 6, 4);
+
+	auto& characterRenderer = _ecs.Registry().emplace<SpriteRenderer>(characterEntity,
+																	  _textures[0], 
+																	  _graphics->CreateBillboard(16.0f, 16.0f), 
+																	  _graphics->CreateShader(L"assets\\shaders\\Unlit.fx", "VS_Main", "vs_4_0", "PS_Main", "ps_4_0"));
+
+	_ecs.Registry().emplace<SpriteAnimation>(characterEntity, _sheets[0], 1.0f / 4.0f, 0u, 1u);
+	_ecs.Registry().emplace<CharacterAnimations>(characterEntity, _sheets[0], _sheets[3]);
+
+	AttachEntityToRoot(characterEntity);
+
+	_physicsWorld->GetBody(characterEntity).SetFixedRotation(true);
+
+	return characterEntity;
 }

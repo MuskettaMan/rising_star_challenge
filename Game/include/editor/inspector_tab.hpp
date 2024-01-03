@@ -3,6 +3,7 @@
 #include "editor/base_tab.hpp"
 #include "visit_struct/visit_struct.hpp"
 #include <engine/ecs.hpp>
+#include "engine/direction.hpp"
 
 struct Transform;
 struct Camera;
@@ -11,6 +12,16 @@ struct SpriteRenderer;
 inline bool InspectValue(const char* name, float& member)
 {
     return ImGui::DragFloat(name, &member, 0.05f);
+}
+
+inline bool InspectValue(const char* name, uint32_t& member)
+{
+    int copy = member;
+    bool dirty = ImGui::DragInt(name, &copy, 0, 99999999);
+
+    member = copy;
+
+    return dirty;
 }
 
 inline bool InspectValue(const char* name, bool& member)
@@ -40,6 +51,15 @@ inline bool InspectValue(const char* name, b2Vec2& member)
 inline bool InspectValue(const char* name, XMFLOAT3& member)
 {
     return ImGui::DragFloat3(name, &member.x, 0.05f);
+}
+
+inline bool InspectValue(const char* name, Direction& member)
+{
+    int value{ static_cast<int>(member) };
+    bool dirty = ImGui::Combo(name, &value, "Right\0Left\0Down\0Up\0");
+    member = static_cast<Direction>(value);
+
+    return dirty;
 }
 
 template <typename T>

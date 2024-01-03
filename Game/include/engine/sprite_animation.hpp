@@ -1,6 +1,7 @@
 #pragma once
 #include "engine/resource_handle.hpp"
 #include "engine/texture.hpp"
+#include "visit_struct/visit_struct.hpp"
 
 struct Spritesheet
 {
@@ -18,3 +19,5 @@ struct SpriteAnimation
 	uint32_t currentColumn;
 	uint32_t currentRow;
 };
+
+VISITABLE_STRUCT(SpriteAnimation, spritesheet, interval, currentColumn, currentRow);

@@ -27,8 +27,8 @@ public:
 private:
 	void BuildMatrices();
 	void BuildChildMatrices(const TransformMatrix& parentMatrix, const HierarchyElement& parent);
-	void HorizontalMovement(float value);
-	void VerticalMovement(float value);
+
+	entt::entity CreateCharacter();
 
 	ECS& _ecs;
 	entt::entity _root;
