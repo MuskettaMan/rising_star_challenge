@@ -152,15 +152,15 @@ entt::entity Game::CreateCharacter()
 	_ecs.Registry().emplace<BoxCollider>(characterEntity, b2_dynamicBody, 8.0f, 8.0f);
 	_ecs.Registry().emplace<CharacterController>(characterEntity, 3.0f);
 
-	_textures[0] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\idle_40x40.dds");
+	_textures[0] = _graphics->CreateTexture(L"assets\\textures\\hooded_knight\\idle.dds");
 	_textures[1] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\death_40x40.dds");
 	_textures[2] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\attack_40x40.dds");
-	_textures[3] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\run_40x40.dds");
+	_textures[3] = _graphics->CreateTexture(L"assets\\textures\\hooded_knight\\run.dds");
 
-	_sheets[0] = _graphics->CreateSpritesheet(_textures[0], 4, 4);
+	_sheets[0] = _graphics->CreateSpritesheet(_textures[0], 3, 4);
 	_sheets[1] = _graphics->CreateSpritesheet(_textures[1], 9, 4);
 	_sheets[2] = _graphics->CreateSpritesheet(_textures[2], 7, 4);
-	_sheets[3] = _graphics->CreateSpritesheet(_textures[3], 6, 4);
+	_sheets[3] = _graphics->CreateSpritesheet(_textures[3], 10, 4);
 
 	auto& characterRenderer = _ecs.Registry().emplace<SpriteRenderer>(characterEntity,
 																	  _textures[0], 
