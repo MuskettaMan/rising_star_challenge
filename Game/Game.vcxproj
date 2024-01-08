@@ -120,6 +120,7 @@
     <ClCompile Include="source\editor\hierarchy_tab.cpp" />
     <ClCompile Include="source\editor\inspector_tab.cpp" />
     <ClCompile Include="source\editor\scene_tab.cpp" />
+    <ClCompile Include="source\engine\camera.cpp" />
     <ClCompile Include="source\engine\ecs.cpp" />
     <ClCompile Include="source\engine\gameobject.cpp" />
     <ClCompile Include="source\engine\hierarchy_element.cpp" />

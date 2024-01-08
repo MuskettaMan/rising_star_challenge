@@ -85,17 +85,27 @@ DX11Graphics::DX11Graphics(HWND hwndIn, ECS& ecs) : _device(nullptr), _context(n
             MessageBox(NULL, "Graphics Failed to create MVP Buffer", "Error!", MB_ICONEXCLAMATION | MB_OK);
         }
 
-        D3D11_BLEND_DESC Desc;
-        ZeroMemory(&Desc, sizeof(D3D11_BLEND_DESC));
-        Desc.RenderTarget[0].BlendEnable = TRUE;
-        Desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-        Desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-        Desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-        Desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
-        Desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
-        Desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-        Desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-        _device->CreateBlendState(&Desc, &_blendState);
+        D3D11_BLEND_DESC blendDesc;
+        ZeroMemory(&blendDesc, sizeof(D3D11_BLEND_DESC));
+        blendDesc.RenderTarget[0].BlendEnable = TRUE;
+        blendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+        blendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+        blendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+        blendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_SRC_ALPHA;
+        blendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+        blendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+        blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+        _device->CreateBlendState(&blendDesc, &_blendState);
+
+        D3D11_RASTERIZER_DESC rasterizerDesc;
+        ZeroMemory(&rasterizerDesc, sizeof(rasterizerDesc));
+        rasterizerDesc.CullMode = D3D11_CULL_NONE;
+        rasterizerDesc.FillMode = D3D11_FILL_SOLID;
+        rasterizerDesc.FrontCounterClockwise = false;
+        rasterizerDesc.DepthClipEnable = true;
+
+        _device->CreateRasterizerState(&rasterizerDesc, _rasterizerState.GetAddressOf());
+        _context->RSSetState(_rasterizerState.Get());
     }
 
     SetupRenderTexture();
@@ -414,7 +424,7 @@ ResourceHandle<Mesh> DX11Graphics::CreateBillboard(float width, float height)
 ResourceHandle<Spritesheet> DX11Graphics::CreateSpritesheet(ResourceHandle<Texture> texture, uint32_t columns, uint32_t rows)
 {
     _spritesheets.emplace_back(texture, columns, rows);
-    return ResourceHandle<Spritesheet>(_spritesheets.size() - 1);
+    return ResourceHandle<Spritesheet>(static_cast<uint32_t>(_spritesheets.size() - 1));
 }
 
 void DX11Graphics::DrawLine(XMFLOAT2 from, XMFLOAT2 to, XMFLOAT3 color)

@@ -6,8 +6,8 @@
 struct Spritesheet
 {
 	ResourceHandle<Texture> texture;
-	uint32_t columns;
-	uint32_t rows;
+	uint32_t columns{0u};
+	uint32_t rows{0u};
 };
 
 struct SpriteAnimation
@@ -16,8 +16,8 @@ struct SpriteAnimation
 
 	float interval{ 1.0f / 4.0f };
 
-	uint32_t currentColumn;
-	uint32_t currentRow;
+	uint32_t currentColumn{0u};
+	uint32_t currentRow{0u};
 };
 
 VISITABLE_STRUCT(SpriteAnimation, spritesheet, interval, currentColumn, currentRow);

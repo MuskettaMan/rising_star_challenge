@@ -6,6 +6,9 @@
 #include "engine/transform.hpp"
 #include <IconsFontAwesome6.h>
 
+ImVec2 SceneTab::_sceneScreenPosition{ 0.0f, 0.0f };
+ImVec2 SceneTab::_sceneScreenSize{ 1.0f, 1.0f };
+
 SceneTab::SceneTab(ImGuiID dockID, IGraphics& graphics, entt::entity& selectedEntity, ImGuiWindowFlags_ windowFlags, ECS& ecs) : BaseTab("Scene", dockID, windowFlags, ImVec2{0.0f, 0.0f}), _graphics(graphics), _selectedEntity(selectedEntity), _ecs(ecs)
 {
 }
@@ -95,17 +98,24 @@ void SceneTab::DrawContents()
 		dummySpace.y = (windowSize.y - newSize.y) / 2.0f;
 	}
 
+	ImVec2 scenePos{ originalPos.x + dummySpace.x, originalPos.y + dummySpace.y };
+	ImGui::Dummy(dummySpace);
+	ImGui::BeginChild(ImGuiID{0x123456}, newSize);
+	{
+		ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
 
-	ImGuizmo::SetDrawlist(ImGui::GetWindowDrawList());
-	
-	ImVec2 scenePos{originalPos.x + dummySpace.x, originalPos.y + dummySpace.y};
-	ImGui::GetWindowDrawList()->AddImage(_graphics.GetRenderTextureSRV(), scenePos,
-										 ImVec2{ scenePos.x + newSize.x, scenePos.y + newSize.y },
-										 ImVec2(0, 0), ImVec2(1, 1));
+		ImGui::GetWindowDrawList()->AddImage(_graphics.GetRenderTextureSRV(), scenePos,
+											 ImVec2{ scenePos.x + newSize.x, scenePos.y + newSize.y },
+											 ImVec2(0, 0), ImVec2(1, 1));
 
-	ImGuizmo::SetRect(scenePos.x, scenePos.y, newSize.x, newSize.y);
-	if (_selectedEntity != entt::null)
-		DrawHandle(_selectedEntity);
+		ImGuizmo::SetRect(scenePos.x, scenePos.y, newSize.x, newSize.y);
+		_sceneScreenPosition = scenePos;
+		_sceneScreenSize = newSize;
+
+		if (_selectedEntity != entt::null)
+			DrawHandle(_selectedEntity);
+	}
+	ImGui::EndChild();
 }
 
 void SceneTab::DrawHandle(entt::entity entity)
@@ -131,7 +141,7 @@ void SceneTab::DrawHandle(entt::entity entity)
 
 	if (interacted)
 	{
-		transformMat = transformMatrix.worldToLocalMatrix * transformMat;
+		transformMat = transformMat * transformMatrix.worldToLocalMatrix;
 
 		XMVECTORF32 newPosition;
 		XMVECTORF32 newScale;

@@ -35,8 +35,10 @@ private:
 	std::unique_ptr<PhysicsWorld> _physicsWorld;
 	std::unique_ptr<InputHandler> _inputHandler;
 
+	entt::entity _cameraEntity;
 	entt::entity _character;
-	std::array<ResourceHandle<Spritesheet>, 4> _sheets;
-	std::array<ResourceHandle<Texture>, 4> _textures;
+	entt::entity _gunPivot;
+	std::array<ResourceHandle<Spritesheet>, 5> _sheets;
+	std::array<ResourceHandle<Texture>, 5> _textures;
 };
 

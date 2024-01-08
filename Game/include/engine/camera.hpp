@@ -4,6 +4,8 @@
 
 using namespace DirectX;
 
+class IInput;
+
 struct CameraMatrix
 {
 	XMMATRIX projection;
@@ -18,3 +20,6 @@ struct Camera
 };
 
 VISITABLE_STRUCT(Camera, size, nearPlane, farPlane);
+
+
+XMFLOAT2 ScreenToWorld(entt::entity cameraEntity, XMFLOAT2 screen, IInput& input, ECS& _ecs = ECS::Default());

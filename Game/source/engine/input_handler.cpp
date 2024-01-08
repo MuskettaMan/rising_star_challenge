@@ -8,7 +8,7 @@ InputHandler::InputHandler(IInput& input) : _input(input)
 ResourceHandle<Input> InputHandler::RegisterAxisInput(AxisInputSetting inputSetting, std::function<void(float)> command)
 {
 	_axisInputs.emplace_back(std::move(inputSetting), std::move(command));
-	return ResourceHandle<Input>(_axisInputs.size() - 1);
+	return ResourceHandle<Input>(static_cast<uint32_t>(_axisInputs.size() - 1));
 }
 
 void InputHandler::Update()

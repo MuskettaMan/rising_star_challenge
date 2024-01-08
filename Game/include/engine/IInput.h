@@ -91,6 +91,9 @@ public:
 	virtual bool IsReleased(MouseInput action) const;
 	virtual bool IsHeld(MouseInput action) const;
 
+	virtual XMFLOAT2 GetMousePosition() const = 0;
+	virtual XMFLOAT2 GetScreenSize() const = 0;
+
 	static const uint32_t GamepadNumInputActions = static_cast<uint32_t>(GamepadInput::NumActions);
 	static const uint32_t KeyboardNumInputActions = static_cast<uint32_t>(KeyboardInput::NumActions);
 	static const uint32_t MouseNumInputActions = static_cast<uint32_t>(MouseInput::NumActions);

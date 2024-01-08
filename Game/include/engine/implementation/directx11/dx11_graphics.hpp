@@ -63,6 +63,7 @@ private:
 	ComPtr<ID3D11Texture2D> _backbufferTexture;
 	ComPtr<ID3D11RenderTargetView> _backbufferRTV;
 	ComPtr<ID3D11BlendState> _blendState;
+	ComPtr<ID3D11RasterizerState> _rasterizerState;
 
 	ComPtr<ID3D11Texture2D> _renderTexture;
 	ComPtr<ID3D11ShaderResourceView> _renderTextureSRV;

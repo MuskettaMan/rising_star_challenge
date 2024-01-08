@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "engine/implementation/xinput/dx_input.hpp"
+#include "editor/scene_tab.hpp"
 
 DirectXInput::DirectXInput() : IInput(), _state()
 {
@@ -68,6 +69,26 @@ void DirectXInput::Update()
 	_currentMouseState[static_cast<uint32_t>(MouseInput::Middle)] = GetKeyState(VK_MBUTTON);
 	_currentMouseState[static_cast<uint32_t>(MouseInput::X1)] = GetKeyState(VK_XBUTTON1);
 	_currentMouseState[static_cast<uint32_t>(MouseInput::X2)] = GetKeyState(VK_XBUTTON2);
+}
+
+XMFLOAT2 DirectXInput::GetMousePosition() const
+{
+	ImVec2 offset{ SceneTab::SceneScreenPosition() };
+	ImVec2 mousePos{ ImGui::GetIO().MousePos };
+
+	return XMFLOAT2{ mousePos.x - offset.x, mousePos.y - offset.y };
+}
+
+XMFLOAT2 DirectXInput::GetScreenSize() const
+{
+	if (ENABLE_EDITOR)
+	{
+		return XMFLOAT2{ SceneTab::SceneScreenSize().x, SceneTab::SceneScreenSize().y };
+	}
+	else
+	{
+		return XMFLOAT2{ ImGui::GetIO().DisplaySize.x, ImGui::GetIO().DisplaySize.y };
+	}
 }
 
 float DirectXInput::CalculateTriggerValue(BYTE rawValue, float threshold, float max)

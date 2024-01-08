@@ -47,13 +47,13 @@ bool Game::Load()
 	_ecs.Registry().emplace<HierarchyRoot>(_root);
 	_ecs.Registry().emplace<TransformMatrix>(_root);
 
-	entt::entity cameraEntity = _ecs.CreateGameObject("Camera");
-	_ecs.Registry().patch<Transform>(cameraEntity, [](auto& transform) { transform.position = { 50.0f, -50.0f }; });
-	_ecs.Registry().emplace<HierarchyElement>(cameraEntity);
-	_ecs.Registry().emplace<Camera>(cameraEntity, 80.0f, 0.1f, 20.0f);
-	_ecs.Registry().emplace<CameraMatrix>(cameraEntity);
+	_cameraEntity = _ecs.CreateGameObject("Camera");
+	_ecs.Registry().patch<Transform>(_cameraEntity, [](auto& transform) { transform.position = { 50.0f, -50.0f }; });
+	_ecs.Registry().emplace<HierarchyElement>(_cameraEntity);
+	_ecs.Registry().emplace<Camera>(_cameraEntity, 80.0f, 0.1f, 20.0f);
+	_ecs.Registry().emplace<CameraMatrix>(_cameraEntity);
 
-	AttachEntityToRoot(cameraEntity);
+	AttachEntityToRoot(_cameraEntity);
 
 
 	entt::entity spriteEntity = _ecs.CreateGameObject("Sprite renderer");
@@ -71,11 +71,35 @@ bool Game::Load()
 	_ecs.Registry().emplace<BoxCollider>(spriteEntity3, b2_staticBody, 16.0f, 16.0f);
 	auto& spriteRenderer3 = _ecs.Registry().emplace<SpriteRenderer>(spriteEntity3, spriteRenderer);
 
+	_textures[0] = _graphics->CreateTexture(L"assets\\textures\\hooded_knight\\idle.dds");
+	_textures[1] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\death_40x40.dds");
+	_textures[2] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\attack_40x40.dds");
+	_textures[3] = _graphics->CreateTexture(L"assets\\textures\\hooded_knight\\run.dds");
+	_textures[4] = _graphics->CreateTexture(L"assets\\textures\\guns.dds");
+
+	_sheets[0] = _graphics->CreateSpritesheet(_textures[0], 3, 4);
+	_sheets[1] = _graphics->CreateSpritesheet(_textures[1], 9, 4);
+	_sheets[2] = _graphics->CreateSpritesheet(_textures[2], 7, 4);
+	_sheets[3] = _graphics->CreateSpritesheet(_textures[3], 10, 4);
+	_sheets[4] = _graphics->CreateSpritesheet(_textures[4], 1, 5);
 
 	_character = CreateCharacter();
 
+	_gunPivot = _ecs.CreateGameObject("Gun Pivot");
+	_ecs.Registry().emplace<HierarchyElement>(_gunPivot);
+
+	entt::entity gunEntity = _ecs.CreateGameObject("Gun");
+	_ecs.Registry().emplace<HierarchyElement>(gunEntity);
+	_ecs.Registry().patch<Transform>(gunEntity, [](auto& transform) { transform.scale = { 1.0f * 0.75, 0.25f * 0.75 }; transform.position = { 10.0f, 0.0f }; });
+	auto& rendererGun = _ecs.Registry().emplace<SpriteRenderer>(gunEntity, spriteRenderer);
+	rendererGun.texture = _textures[4];
+	_ecs.Registry().emplace<SpriteAnimation>(gunEntity, _sheets[4], 0.0f, 0u, 0u);
+
 	AttachEntityToRoot(spriteEntity);
 	AttachEntityToRoot(spriteEntity3);
+
+	AttachEntityToParent(_gunPivot, _character);
+	AttachEntityToParent(gunEntity, _gunPivot);
 
 	
 	// Legacy inputs, might be useful later.
@@ -95,6 +119,19 @@ bool Game::Load()
 void Game::Update()
 {
 	_inputHandler->Update();
+
+	auto& characterTransform = _ecs.Registry().get<Transform>(_character);
+	auto& gunPivotTransform = _ecs.Registry().get<Transform>(_gunPivot);
+
+	XMFLOAT2 characterPos = characterTransform.position;
+	XMFLOAT2 mousePos = ScreenToWorld(_cameraEntity, _input->GetMousePosition(), *_input);;
+	gunPivotTransform.rotation = std::atan2(mousePos.y - characterPos.y, mousePos.x - characterPos.x);
+
+	
+	XMVECTOR mousePosVec = XMLoadFloat2(&mousePos);
+	XMVECTOR characterPosVec = XMLoadFloat2(&characterPos);
+	float dotProduct = DirectX::XMVector2Dot(XMVector2Normalize(mousePosVec - characterPosVec), XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f)).m128_f32[0];
+	gunPivotTransform.scale.y = dotProduct > 0 ? 1.0f : -1.0f;
 
 	UpdateCharacterControllers(*_input, *_physicsWorld);
 	UpdateCharacterAnimations(*_graphics);
@@ -151,16 +188,6 @@ entt::entity Game::CreateCharacter()
 	_ecs.Registry().patch<Transform>(characterEntity, [](auto& transform) { transform.position = { 20.0f, 0.0f }; transform.scale = { 1.0f, 1.0f }; });
 	_ecs.Registry().emplace<BoxCollider>(characterEntity, b2_dynamicBody, 8.0f, 8.0f);
 	_ecs.Registry().emplace<CharacterController>(characterEntity, 3.0f);
-
-	_textures[0] = _graphics->CreateTexture(L"assets\\textures\\hooded_knight\\idle.dds");
-	_textures[1] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\death_40x40.dds");
-	_textures[2] = _graphics->CreateTexture(L"assets\\textures\\rpg_hero\\attack_40x40.dds");
-	_textures[3] = _graphics->CreateTexture(L"assets\\textures\\hooded_knight\\run.dds");
-
-	_sheets[0] = _graphics->CreateSpritesheet(_textures[0], 3, 4);
-	_sheets[1] = _graphics->CreateSpritesheet(_textures[1], 9, 4);
-	_sheets[2] = _graphics->CreateSpritesheet(_textures[2], 7, 4);
-	_sheets[3] = _graphics->CreateSpritesheet(_textures[3], 10, 4);
 
 	auto& characterRenderer = _ecs.Registry().emplace<SpriteRenderer>(characterEntity,
 																	  _textures[0], 

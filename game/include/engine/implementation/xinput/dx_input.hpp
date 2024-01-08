@@ -10,6 +10,8 @@ public:
 	virtual ~DirectXInput();
 
 	virtual void Update();
+	XMFLOAT2 GetMousePosition() const override;
+	XMFLOAT2 GetScreenSize() const override;
 
 private:
 
