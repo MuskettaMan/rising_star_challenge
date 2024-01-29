@@ -7,6 +7,8 @@
 #include <engine/sprite_renderer.hpp>
 #include <engine/sprite_animation.hpp>
 
+extern const bool ENABLE_EDITOR;
+
 DX11Graphics::DX11Graphics(HWND hwndIn, ECS& ecs) : _device(nullptr), _context(nullptr), _swapChain(nullptr), _backbufferRTV(nullptr), _backbufferTexture(nullptr), _mvp(nullptr), _featureLevel(D3D_FEATURE_LEVEL_11_0), _hwnd(hwndIn), _windowWidth(0), _windowHeight(0), _ecs(ecs)
 {
     RECT dimensions;

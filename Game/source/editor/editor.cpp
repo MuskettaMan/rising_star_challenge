@@ -8,6 +8,8 @@
 
 #include "engine/IGraphics.h"
 
+extern const bool ENABLE_EDITOR;
+
 Editor::Editor(IGraphics& graphics) : _graphics(graphics)
 {
 	if (ENABLE_EDITOR)

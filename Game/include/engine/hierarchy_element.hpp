@@ -2,6 +2,7 @@
 
 #include <vector>
 #include "entt/fwd.hpp"
+#include "engine/ecs.hpp"
 
 struct HierarchyElement
 {

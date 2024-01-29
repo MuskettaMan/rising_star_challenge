@@ -4,6 +4,8 @@
 #include "visit_struct/visit_struct.hpp"
 #include <engine/ecs.hpp>
 #include "engine/direction.hpp"
+#include "engine/resource_handle.hpp"
+#include "engine/ecs.hpp"
 
 struct Transform;
 struct Camera;

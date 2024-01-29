@@ -6,6 +6,7 @@
 #include "engine/implementation/directx11/dx11_mesh.hpp"
 #include "engine/sprite_animation.hpp"
 #include "engine/transform.hpp"
+#include "engine/ecs.hpp"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;

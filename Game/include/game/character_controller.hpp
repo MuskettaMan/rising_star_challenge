@@ -3,6 +3,7 @@
 #include "engine/sprite_animation.hpp"
 #include "visit_struct/visit_struct.hpp"
 #include <engine/direction.hpp>
+#include "engine/ITime.hpp"
 
 class IInput;
 class PhysicsWorld;
@@ -24,7 +25,7 @@ struct CharacterAnimations
 };
 
 void UpdateCharacterControllers(IInput& input, PhysicsWorld& physics, ECS& ecs = ECS::Default());
-void UpdateCharacterAnimations(IGraphics& graphics, ECS& ecs = ECS::Default());
+void UpdateCharacterAnimations(IGraphics& graphics, ITime& time, ECS& ecs = ECS::Default());
 
 VISITABLE_STRUCT(CharacterController, speed, isMoving, direction);
 VISITABLE_STRUCT(CharacterAnimations, idleSheet, moveSheet);

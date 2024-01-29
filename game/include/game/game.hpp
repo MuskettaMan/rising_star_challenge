@@ -3,6 +3,8 @@
 
 #include "engine/IApplication.h"
 #include "engine/sprite_animation.hpp"
+#include "engine/ecs.hpp"
+#include "engine/time.hpp"
 
 class PhysicsWorld;
 class IGraphics;
@@ -31,6 +33,7 @@ private:
 	entt::entity CreateCharacter();
 
 	ECS& _ecs;
+	Time _time;
 	entt::entity _root;
 	std::unique_ptr<PhysicsWorld> _physicsWorld;
 	std::unique_ptr<InputHandler> _inputHandler;

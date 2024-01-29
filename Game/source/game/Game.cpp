@@ -27,7 +27,8 @@ Game::Game(std::shared_ptr<IGraphics> graphics, std::shared_ptr<IInput> input, E
 	IApplication(graphics, input), 
 	_physicsWorld(std::make_unique<PhysicsWorld>(std::make_unique<PhysicsDebugDrawer>(*_graphics))), 
 	_inputHandler(std::make_unique<InputHandler>(*input)),
-	_ecs(ecs)
+	_ecs(ecs),
+	_time()
 {
 }
 
@@ -118,6 +119,12 @@ bool Game::Load()
 
 void Game::Update()
 {
+	_time.Update();
+	std::stringstream ss;
+	ss << std::to_string(_time.Delta().count());
+	ss << "\n";
+	OutputDebugStringA(ss.str().c_str());
+
 	_inputHandler->Update();
 
 	auto& characterTransform = _ecs.Registry().get<Transform>(_character);
@@ -134,7 +141,7 @@ void Game::Update()
 	gunPivotTransform.scale.y = dotProduct > 0 ? 1.0f : -1.0f;
 
 	UpdateCharacterControllers(*_input, *_physicsWorld);
-	UpdateCharacterAnimations(*_graphics);
+	UpdateCharacterAnimations(*_graphics, _time);
 
 	_physicsWorld->Update();
 	BuildMatrices();

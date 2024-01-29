@@ -1,6 +1,7 @@
 #pragma once
 #include <directxmath.h>
 #include "visit_struct/visit_struct.hpp"
+#include "engine/ecs.hpp"
 
 using namespace DirectX;
 

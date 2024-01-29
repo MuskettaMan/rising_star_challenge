@@ -48,10 +48,3 @@ using namespace DirectX;
 // Else
 #include "stduuid/uuid.h"
 
-// Constants
-constexpr bool ENABLE_EDITOR = true;
-
-// ECS
-#include "engine/ecs.hpp"
-
-#include "engine/resource_handle.hpp"

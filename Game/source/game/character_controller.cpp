@@ -46,11 +46,8 @@ void UpdateCharacterControllers(IInput& input, PhysicsWorld& physics, ECS& ecs)
 	}
 }
 
-void UpdateCharacterAnimations(IGraphics& graphics, ECS& ecs)
+void UpdateCharacterAnimations(IGraphics& graphics, ITime& time, ECS& ecs)
 {
-	static float time{ 0.0f };
-	time += 0.001666f;
-
 	auto view = ecs.Registry().view<const CharacterAnimations, const CharacterController, SpriteAnimation>();
 
 	for (auto entity : view)
@@ -60,7 +57,9 @@ void UpdateCharacterAnimations(IGraphics& graphics, ECS& ecs)
 		animation.spritesheet = character.isMoving ? animations.moveSheet : animations.idleSheet;
 		animation.currentRow = static_cast<uint32_t>(character.direction);
 
-		uint32_t frame = static_cast<uint32_t>(time / animation.interval);
+		float totalSeconds = time.Total().count() * 0.001f;
+		float deltaTimeSeconds = time.Delta().count() * 0.1f;
+		uint32_t frame = static_cast<uint32_t>(totalSeconds / animation.interval);
 		animation.currentColumn = frame % graphics.GetSpritesheet(animation.spritesheet).columns;
 	}
 }

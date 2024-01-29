@@ -71,7 +71,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalUsingDirectories>
       </AdditionalUsingDirectories>
-      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -94,7 +94,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>include;third_party\imgui\;$(ProjectDir)third_party\;third_party\box2d\include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalUsingDirectories>
@@ -113,6 +113,7 @@
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="include\engine\time.cpp" />
     <ClCompile Include="source\editor\base_tab.cpp" />
     <ClCompile Include="source\editor\editor_environment.cpp" />
     <ClCompile Include="source\editor\editor.cpp" />
@@ -121,6 +122,7 @@
     <ClCompile Include="source\editor\inspector_tab.cpp" />
     <ClCompile Include="source\editor\scene_tab.cpp" />
     <ClCompile Include="source\engine\camera.cpp" />
+    <ClCompile Include="source\engine\consts.cpp" />
     <ClCompile Include="source\engine\ecs.cpp" />
     <ClCompile Include="source\engine\gameobject.cpp" />
     <ClCompile Include="source\engine\hierarchy_element.cpp" />
@@ -171,6 +173,7 @@
     <ClInclude Include="include\engine\implementation\directx11\dx11_shader.hpp" />
     <ClInclude Include="include\engine\implementation\xinput\dx_input.hpp" />
     <ClInclude Include="include\engine\input_handler.hpp" />
+    <ClInclude Include="include\engine\ITime.hpp" />
     <ClInclude Include="include\engine\mesh.hpp" />
     <ClInclude Include="include\engine\physics_debug_drawer.hpp" />
     <ClInclude Include="include\engine\physics_world.hpp" />
@@ -179,6 +182,7 @@
     <ClInclude Include="include\engine\sprite_animation.hpp" />
     <ClInclude Include="include\engine\sprite_renderer.hpp" />
     <ClInclude Include="include\engine\texture.hpp" />
+    <ClInclude Include="include\engine\time.hpp" />
     <ClInclude Include="include\engine\transform.hpp" />
     <ClInclude Include="include\game\character_controller.hpp" />
     <ClInclude Include="include\game\game.hpp" />

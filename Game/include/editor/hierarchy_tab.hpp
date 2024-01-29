@@ -1,6 +1,7 @@
 #pragma once
 
 #include "editor/base_tab.hpp"
+#include "engine/ecs.hpp"
 
 struct HierarchyElement;
 

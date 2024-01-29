@@ -39,6 +39,7 @@ void PhysicsWorld::Update()
 	constexpr int32_t POSITION_ITERATIONS = 2;
 	_world.Step(1.0f / 60.0f, VELOCITY_ITERATIONS, POSITION_ITERATIONS);
 	_world.DebugDraw();
+	
 }
 
 void PhysicsWorld::OnBoxColliderCreate(entt::registry& registry, entt::entity entity)

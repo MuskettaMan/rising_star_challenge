@@ -2,6 +2,8 @@
 #include "engine/implementation/xinput/dx_input.hpp"
 #include "editor/scene_tab.hpp"
 
+extern const bool ENABLE_EDITOR;
+
 DirectXInput::DirectXInput() : IInput(), _state()
 {
 }
